@@ -1,38 +1,33 @@
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 3000; // Gán giá trị mặc định là 3000 nếu PORT không được thiết lập trong .env
+const port = process.env.PORT || 3000; // Default port is 3000
 const hostname = 'localhost';
-const connection = require('./config/database')
-
-// A simple SELECT query
-connection.query(
-  'SELECT * FROM Product WHERE name_food = "Chicken Breast"',
-  function (err, results, fields) {
-    if (err) {
-      console.error(err);
-    } else {
-      console.log(results); // logs the details of the food 'Chicken Breast'
-      console.log(fields);  // logs extra meta data about results, if available
-    }
-  }
-);
-// Close the connection
-connection.end();
-
+const connection = require('./config/database'); // Import the connection pool
+const foodRoutes = require('./routes/foodRoutes');
 require('dotenv').config();
 
-// Middleware để phân tích JSON
-app.use(express.json()); // Thêm middleware để phân tích body JSON
+// Middleware to parse JSON
+app.use(express.json()); // Add middleware to parse JSON body
 
-// Import api.js
-const apiRouter = require('./routes/api');
-const webRouter = require('./routes/web');
+// Đăng ký các routes RESTful cho API
+app.use('/api/foods', foodRoutes);
 
-// Sử dụng apiRouter cho các route bắt đầu bằng /api
-app.use('/api', apiRouter);
-app.use('/',webRouter);
+// A simple endpoint to test the database connection
+app.get('/test-query', (req, res) => {
+    connection.query(
+        'SELECT * FROM foods WHERE name = "Apple" ',
+        (err, results, fields) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: 'Database query failed' });
+            }
+            console.log(results); // logs the details of the food 'Chicken Breast'
+            return res.json(results); // Send results as a JSON response
+        }
+    );
+});
 
-// Lắng nghe server
+// Start the server
 app.listen(port, () => {
-  console.log(`Example app listening at http://${hostname}:${port}`);
+    console.log(`Example app listening at http://${hostname}:${port}`);
 });
