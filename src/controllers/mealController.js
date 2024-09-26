@@ -8,7 +8,8 @@ const AddFoodInMeal = async (req, res) => {
 
   try {
     const result = await mealModel. manageFoodInMeal(mealId, foodId, action);
-    res.status(200).json({ message: `Food ${action}ed successfully`, result });
+    const nutritionData = await mealModel. getTotalNutrition();
+    res.status(200).json({ message: `Food ${action}ed successfully`, result,nutritionData });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -121,6 +121,28 @@ const manageFoodInMeal = (mealId, foodId, action) => {
   });
 };
 
+// Hàm để lấy tổng dinh dưỡng của tất cả bữa ăn (meals)
+const getTotalNutrition = () => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        SUM(m.total_calories) AS total_calories,
+        SUM(m.total_carbs) AS total_carbs,
+        SUM(m.total_protein) AS total_protein,
+        SUM(m.total_fat) AS total_fat
+      FROM meals m
+    `;
+    connection.query(query, (err, results) => {
+      if (err) {
+        reject(err); // Trả về lỗi nếu có
+      } else {
+        resolve(results[0]); // Trả về kết quả (dòng đầu tiên chứa tổng dinh dưỡng)
+      }
+    });
+  });
+};
+
 module.exports = {
   manageFoodInMeal,
+  getTotalNutrition
 };
