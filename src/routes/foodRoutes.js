@@ -4,9 +4,9 @@ const router = express.Router();
 const foodController = require('../controllers/foodController');
 
 // Định nghĩa các route RESTful cho Food
-router.get('/', foodController.getFoods);        // Lấy tất cả thực phẩm
-router.post('/', foodController.addFood);         // Thêm thực phẩm mới
-router.put('/:id', foodController.updateFood);    // Cập nhật thực phẩm theo id
-router.delete('/:id', foodController.deleteFood); // Xóa thực phẩm theo id
+router.get('/foods', foodController.getFoods);        // Lấy tất cả thực phẩm
+router.post('/foods', foodController.addFood);         // Thêm thực phẩm mới
+router.put('/foods/:id', foodController.updateFood);    // Cập nhật thực phẩm theo id
+router.delete('/foods/:id', foodController.deleteFood); // Xóa thực phẩm theo id
 
 module.exports = router;
