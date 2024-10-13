@@ -1,83 +1,64 @@
 // src/model/foodModel.js
 const connection = require('../config/database');
 
-// Lấy tất cả User
-const getAllUsers = () => {
+// Tìm người dùng theo email
+const findUserByEmail = (email) => {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT * FROM users', (err, results) => {
-      if (err) reject(err);
-      else resolve(results);
-    });
+      connection.query('SELECT * FROM User WHERE email = ?', [email], (err, results) => {
+          if (err) {
+              return reject(err);
+          }
+          resolve(results[0]); // Nếu không có lỗi, trả về kết quả tìm thấy
+      });
   });
 };
 
-// Thêm một User mới
-const createUser = (information) => {
+// Tạo người dùng mới
+const createUser = (userData) => {
   return new Promise((resolve, reject) => {
-    connection.query('INSERT INTO users SET ?', information, (err, results) => {
-      if (err) reject(err);
-      else resolve(results);
-    });
+      const { name, email, password, height, weight, birthday, gender, activity_level } = userData;
+      connection.query(
+          'INSERT INTO User (name, email, password, height, weight, birthday, gender, activity_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [name, email, password, height, weight, birthday, gender, activity_level],
+          (err, results) => {
+              if (err) {
+                  return reject(err);
+              }
+              resolve({ userId: results.insertId, ...userData }); // Trả về dữ liệu người dùng mới
+          }
+      );
   });
 };
+
 
 // Cập nhật thông tin User
-const updateUser = (id, foodData) => {
+const updateUser = (id, userData) => {
   return new Promise((resolve, reject) => {
-    connection.query('UPDATE users SET ? WHERE user_id = ?', [foodData, id], (err, results) => {
+    const updateQuery = 'UPDATE users SET ? WHERE user_id = ?';
+    connection.query(updateQuery, [userData, id], (err, results) => {
       if (err) reject(err);
       else resolve(results);
     });
   });
 };
 
-// Xóa User
-const deleteUser = (id) => {
+
+const getCaloriesGoal = (userId) => {
   return new Promise((resolve, reject) => {
-    connection.query('DELETE FROM users WHERE user_id = ?', [id], (err, results) => {
+    const getQuery = 'SELECT calories_remaining FROM diary WHERE user_id = ?';
+    connection.query(getQuery, [userId], (err, results) => {
       if (err) reject(err);
-      else resolve(results);
+      else if (results.length === 0) resolve(null); // Handle no results
+      else resolve(results[0]); // Return the first result
     });
   });
 };
 
-// Hàm cập nhật TDEE của user
-const updateUserTDEE = (userId, TDEE) => {
-  return new Promise((resolve, reject) => {
-    const updateQuery = 'UPDATE users SET TDEE = ? WHERE user_id = ?';
-    connection.query(updateQuery, [TDEE, userId], (err, results) => {
-      if (err) reject(err);
-      else resolve(results);
-    });
-  });
-};
-
-// Hàm tính TDEE dựa trên thông tin user
-const calculateTDEE = (user) => {
-  const { weight, height, age, gender, activity_level } = user; // Lấy thông tin user
-  let BMR;
-
-  // Tính BMR dựa trên công thức Harris-Benedict
-  if (gender === 'male') {
-    BMR = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
-  } else {
-    BMR = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
-  }
-
-  // Tính TDEE dựa trên BMR và mức độ hoạt động
-  const TDEE = BMR * activity_level;
-  return TDEE;
-};
 
 module.exports = {
-  
-};
-module.exports = {
-  getAllUsers,
   createUser,
   updateUser,
-  deleteUser,
-  
-  updateUserTDEE,
-  calculateTDEE,
+  findUserByEmail,
+  createUser,
+  getCaloriesGoal
 };

@@ -1,33 +1,33 @@
 const connection = require('../config/database');
 
-// Cập nhật giá trị tổng dinh dưỡng (calories, carbs, protein, fat) của diary
+// Cập nhật giá trị tổng dinh dưỡng tiêu thụ (calories, carbs, protein, fat) của diary
 const updateDiaryNutrition = (diaryId) => {
   const updateQuery = `
     UPDATE diary d
     SET 
-      d.total_diary_calories = (
-        SELECT COALESCE(SUM(m.total_calories), 0) 
+      d.calories_consumed = (
+        SELECT COALESCE(SUM(m.meal_calories), 0) 
+        FROM diary_meal dm
+        JOIN meals m ON m.meal_id = d.meal_id
+        WHERE dm.diary_id = d.diary_id
+        AND d.diary_id = ?
+      ),
+      d.carbs_consumed = (
+        SELECT COALESCE(SUM(m.meal_carbs), 0) 
         FROM diary_meal dm
         JOIN meals m ON m.meal_id = dm.meal_id
         WHERE dm.diary_id = d.diary_id
         AND d.diary_id = ?
       ),
-      d.total_diary_carbs = (
-        SELECT COALESCE(SUM(m.total_carbs), 0) 
+      d.protein_consumed = (
+        SELECT COALESCE(SUM(m.meal_protein), 0) 
         FROM diary_meal dm
         JOIN meals m ON m.meal_id = dm.meal_id
         WHERE dm.diary_id = d.diary_id
         AND d.diary_id = ?
       ),
-      d.total_diary_protein = (
-        SELECT COALESCE(SUM(m.total_protein), 0) 
-        FROM diary_meal dm
-        JOIN meals m ON m.meal_id = dm.meal_id
-        WHERE dm.diary_id = d.diary_id
-        AND d.diary_id = ?
-      ),
-      d.total_diary_fat = (
-        SELECT COALESCE(SUM(m.total_fat), 0) 
+      d.fat_consumed = (
+        SELECT COALESCE(SUM(m.meal_fat), 0) 
         FROM diary_meal dm
         JOIN meals m ON m.meal_id = dm.meal_id
         WHERE dm.diary_id = d.diary_id
@@ -43,6 +43,53 @@ const updateDiaryNutrition = (diaryId) => {
   });
 };
 
+// Lưu dinh dưỡng cần nạp theo chế độ vào bảng Diary
+const saveDiaryEntry = (userId, adjustedTDEE, macros) => {
+  return new Promise((resolve, reject) => {
+      const { protein, carbs, fat } = macros;
+      const query = `
+      INSERT INTO Diary (date, calories_remaining, protein_remaining, carbs_remaining, fat_remaining, user_id)
+      VALUES (CURDATE(), ?, ?, ?, ?, ?)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+  `;
+    connection.query(query, [adjustedTDEE, protein, carbs, fat, userId], (err, results) => {
+      if (err) reject(err);
+      else resolve(results);
+    });
+  });
+};
+
+
+// Tạo mới 1 diary khi người dùng nhập date mới
+const newDiary = (date) => {
+  return new Promise((resolve, reject) => {
+      const query = `
+      INSERT INTO Diary (date)
+      VALUES (?)
+  `;
+    connection.query(query, [date], (err, results) => {
+      if (err) reject(err);
+      else resolve(results);
+    });
+  });
+};
+
+// Tạo mới 1 diary khi người dùng nhập date mới
+const showDiarybyDate = (date) => {
+  return new Promise((resolve, reject) => {
+      const query = `
+      SELECT * FROM Diary WHERE date = ?;
+  `;
+    connection.query(query, [date], (err, results) => {
+      if (err) reject(err);
+      else resolve(results);
+    });
+  });
+};
+
+
 module.exports = {
-  updateDiaryNutrition
+  updateDiaryNutrition,
+  saveDiaryEntry,
+  newDiary,
+  showDiarybyDate
 };

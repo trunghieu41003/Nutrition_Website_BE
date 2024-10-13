@@ -1,16 +1,24 @@
-// src/routes/mealRoutes.js
 const express = require('express');
-const meal = require('../controllers/mealController');
-
 const router = express.Router();
+const mealController = require('../controllers/mealController');
 
-// Route để thêm thực phẩm vào bữa ăn
-router.post('/meals/:mealId/foods/:foodId', meal.addFoodToMeal); // Thêm thực phẩm vào meal với mealId và foodId từ params, portion và size từ body
-// Route để xóa thực phẩm khỏi bữa ăn
-router.delete('/meals/:mealId/foods/:foodId', meal.removeFoodFromMeal); // Xóa thực phẩm khỏi meal với mealId và foodId từ params
-// Route để cập nhật size hay portion cho món ăn trong bữa ăn
-router.put('/meals/:mealId/foods/:foodId', meal.updatePortionSize); // Cập nhật portion và size với mealId và foodId từ params, portion và size từ body
-// Route để xem chỉ số dinh dưỡng tổng trong bữa ăn
-router.get('/meals', meal.getNutrition); // Xem chỉ số dinh dưỡng tổng
-router.get('/meals/:mealId', meal.getNutritionbyid); // Xem chỉ số dinh dưỡng tổng của từng meal
+// Thêm món ăn vào danh sách
+router.post('/diaries/:diaryId/meals/:mealId/foods/:foodId', mealController.addFoodToMeal);
+
+// Xóa món ăn khỏi danh sách
+router.delete('/diaries/:diaryId/meals/:mealId/foods/:foodId', mealController.removeFoodFromMeal);
+
+// Cập nhật portion và size của món ăn
+router.put('/diaries/:diaryId/meals/:mealId/foods/:foodId', mealController.updatePortionSize);
+
+// Lấy tổng dinh dưỡng của danh sách trong 1 bữa ăn
+router.get('/diaries/:diaryId/meals/:mealId/nutritions', mealController.getNutritionById);
+
+// Lấy dinh dưỡng tất cả
+//router.get('/diaries/:diaryId/nutritions', mealController.getNutrition);
+
+router.get('/diaries/:diaryId/meals/:mealId/foods/:foodId', mealController.getfoodInformation);
+
+
 module.exports = router;
+

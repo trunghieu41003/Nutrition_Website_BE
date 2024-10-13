@@ -22,8 +22,11 @@
   },
   "homepage": "https://github.com/trunghieu41003/Web-app-test#readme",
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "dotenv": "16.0.3",
     "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
     "mysql2": "2.3.3",
     "sequelize": "^6.37.3"
   },

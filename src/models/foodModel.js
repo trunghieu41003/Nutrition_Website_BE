@@ -4,7 +4,7 @@ const connection = require('../config/database');
 // Lấy tất cả thực phẩm
 const getAllFoods = () => {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT * FROM Foods', (err, results) => {
+    connection.query('SELECT * FROM food', (err, results) => {
       if (err) reject(err);
       else resolve(results);
     });
@@ -14,7 +14,7 @@ const getAllFoods = () => {
 // Thêm một thực phẩm mới
 const createFood = (foodData) => {
   return new Promise((resolve, reject) => {
-    connection.query('INSERT INTO Foods SET ?', foodData, (err, results) => {
+    connection.query('INSERT INTO food SET ?', foodData, (err, results) => {
       if (err) reject(err);
       else resolve(results);
     });
@@ -24,7 +24,7 @@ const createFood = (foodData) => {
 // Cập nhật thông tin thực phẩm
 const updateFood = (id, foodData) => {
   return new Promise((resolve, reject) => {
-    connection.query('UPDATE Foods SET ? WHERE food_id = ?', [foodData, id], (err, results) => {
+    connection.query('UPDATE food SET ? WHERE food_id = ?', [foodData, id], (err, results) => {
       if (err) reject(err);
       else resolve(results);
     });
@@ -34,7 +34,7 @@ const updateFood = (id, foodData) => {
 // Xóa thực phẩm
 const deleteFood = (id) => {
   return new Promise((resolve, reject) => {
-    connection.query('DELETE FROM Foods WHERE food_id = ?', [id], (err, results) => {
+    connection.query('DELETE FROM food WHERE food_id = ?', [id], (err, results) => {
       if (err) reject(err);
       else resolve(results);
     });

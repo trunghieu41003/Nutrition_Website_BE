@@ -1,65 +1,85 @@
 // src/controller/UserController.js
 const UserModel = require('../models/userModel');
-// Lấy tất cả User
-const getUsers = async (req, res) => {
+const goalModel = require('../models/goalModel');
+const TDEEService = require('../services/TDEEService');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+// Xử lý đăng ký người dùng
+const signUp = async (req, res) => {
+  const { name, email, password, height, weight, birthday, gender, activity_level, goal_type, weight_goal } = req.body;
+
   try {
-    const Users = await UserModel.getAllUsers();
-    res.json(Users);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+      // Kiểm tra xem email đã tồn tại hay chưa
+      const existingUser = await UserModel.findUserByEmail(email);
+      if (existingUser) {
+          return res.status(400).json({ message: 'Email đã tồn tại' });
+      }
+
+      // Mã hóa mật khẩu
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Tạo người dùng mới
+      const newUser = await UserModel.createUser({
+          name, email, password: hashedPassword, height, weight, birthday, gender, activity_level
+      });
+      // Tạo mục tiêu mới
+      const newGoal = await goalModel.newGoal({ goal_type, weight_goal });
+
+      // Liên kết người dùng với mục tiêu
+      await goalModel.linkUserGoal(newGoal.goalId, newUser.userId );
+
+      await TDEEService.updateUserTDEEAndDiary(newUser.userId, newUser, newGoal, newGoal.goalId);
+
+      const calories = await UserModel.getCaloriesGoal(newUser.userId);
+      const daytoGoal = await goalModel.getGoalinformation(newGoal.goalId);
+      // Trả về cả userId và goalId
+      res.status(201).json({ message: 'Đăng ký thành công', user: newUser, goal: newGoal, calories_goal:calories, goalafter:daytoGoal });
+  } catch (error) {
+      res.status(500).json({ message: 'Lỗi khi đăng ký', error: error.message });
   }
 };
 
-// Cập nhật thông tin User
-const updateUser = async (req, res) => {
+// Xử lý đăng nhập
+const logIn = async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const id = req.params.id;
-    const UserData = req.body;
-    const result = await UserModel.updateUser(id, UserData);
-    const TDEE = UserModel.calculateTDEE(UserData);
-    await UserModel.updateUserTDEE(id, TDEE);
-    res.json({ message: 'User updated' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+      // Kiểm tra xem email có tồn tại không
+      const user = await UserModel.findUserByEmail(email);
+      if (!user) {
+          return res.status(404).json({ message: 'Email không tồn tại' });
+      }
+
+      // Kiểm tra mật khẩu
+      const validPassword = await bcrypt.compare(password, user.password);
+      if (!validPassword) {
+          return res.status(401).json({ message: 'Mật khẩu không đúng' });
+      }
+
+      // Tạo token hoặc session
+      const token = jwt.sign({ userId: user.user_id, email: user.email }, 'secret_key', { expiresIn: '1h' });
+
+      res.status(200).json({ message: 'Đăng nhập thành công', token });
+  } catch (error) {
+      res.status(500).json({ message: 'Lỗi khi đăng nhập', error: error.message });
   }
 };
 
-// Xóa User
-const deleteUser = async (req, res) => {
-  try {
-    const id = req.params.id;
-    await UserModel.deleteUser(id);
-    res.json({ message: 'User deleted' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// Xử lý đăng xuất
+const logout = (req, res) => {
+  // Xóa session
+  req.session.destroy((err) => {
+      if (err) {
+          return res.status(500).json({ message: 'Lỗi khi đăng xuất' });
+      }
+      res.status(200).json({ message: 'Đăng xuất thành công' });
+  });
 };
 
-const addUser = async (req, res) => {
-  try {
-    // Bước 1: Lấy thông tin user từ body request
-    const newUser = req.body;
-
-    // Bước 2: Thêm user mới vào database
-    const result = await UserModel.createUser(newUser);
-    const userId = result.insertId; // Lấy userId sau khi tạo
-
-    // Bước 3: Tính toán TDEE dựa trên thông tin của user
-    const TDEE = UserModel.calculateTDEE(newUser); // Hàm này sẽ tính toán TDEE dựa trên thông tin user
-    
-    // Bước 4: Cập nhật trường TDEE cho user vừa tạo
-    await UserModel.updateUserTDEE(userId, TDEE);
-
-    // Bước 5: Trả về kết quả thành công
-    res.status(201).json({ message: 'User created', userId: userId, TDEE: TDEE });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
 
 module.exports = {
-  getUsers,
-  addUser,
-  updateUser,
-  deleteUser,
+  signUp,
+  logIn,
+  logout
 };
