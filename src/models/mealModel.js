@@ -67,33 +67,33 @@ const updateMealNutrition = (ListFoodId) => {
           COALESCE(SUM((f.calories * lff.size) / f.serving_size * lff.portion), 0)
         FROM ListFood_food lff
         JOIN Food f ON lff.food_id = f.food_id
-        WHERE lff.ListFood_ID = lf.ListFood_ID
+        WHERE lf.ListFood_id = ?
       ),
       lf.ListFood_carbs = (
         SELECT 
           COALESCE(SUM((f.carbs * lff.size) / f.serving_size * lff.portion), 0)
         FROM ListFood_food lff
         JOIN Food f ON lff.food_id = f.food_id
-        WHERE lff.ListFood_ID = lf.ListFood_ID
+        WHERE lf.ListFood_id = ?
       ),
       lf.ListFood_protein = (
         SELECT 
           COALESCE(SUM((f.protein * lff.size) / f.serving_size * lff.portion), 0)
         FROM ListFood_food lff
         JOIN Food f ON lff.food_id = f.food_id
-        WHERE lff.ListFood_ID = lf.ListFood_ID
+        WHERE lf.ListFood_id = ?
       ),
       lf.ListFood_fat = (
         SELECT 
           COALESCE(SUM((f.fat * lff.size) / f.serving_size * lff.portion), 0)
         FROM ListFood_food lff
         JOIN Food f ON lff.food_id = f.food_id
-        WHERE lff.ListFood_ID = lf.ListFood_ID
+        WHERE lf.ListFood_id = ?
       )
     WHERE lf.ListFood_ID = ?;
   `;
   return new Promise((resolve, reject) => {
-    connection.query(updateQuery, [ListFoodId], (err, results) => {
+    connection.query(updateQuery, [ListFoodId,ListFoodId,ListFoodId,ListFoodId,ListFoodId], (err, results) => {
       if (err) {
         reject(err);
       } else {
@@ -103,6 +103,70 @@ const updateMealNutrition = (ListFoodId) => {
   });
 };
 
+const updateFoodNutrition = (ListFoodId, foodId) => {
+  const updateQuery = `
+    UPDATE ListFood_food lff
+    JOIN Food f ON lff.food_id = f.food_id
+    SET 
+      lff.calories = COALESCE(((f.calories * lff.size) / f.serving_size * lff.portion), 0),
+      lff.carbs = COALESCE(((f.carbs * lff.size) / f.serving_size * lff.portion), 0),
+      lff.protein = COALESCE(((f.protein * lff.size) / f.serving_size * lff.portion), 0),
+      lff.fat = COALESCE(((f.fat * lff.size) / f.serving_size * lff.portion), 0)
+    WHERE lff.ListFood_ID = ? AND lff.food_id = ?;
+  `;
+  return new Promise((resolve, reject) => {
+    connection.query(updateQuery, [ListFoodId, foodId], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};
+
+
+
+const updateDiaryNutrition = (diaryId) => {
+  const updateQuery = `
+    UPDATE diary 
+    SET 
+      calories_consumed = (
+        SELECT 
+          COALESCE(SUM(ListFood_calories), 0)
+        FROM diary_listFood dl Join ListFood lf on dl.ListFood_ID = lf.ListFood_ID
+        WHERE diary_id = ?
+      ),
+      carbs_consumed = (
+        SELECT 
+          COALESCE(SUM(ListFood_carbs), 0)
+        FROM diary_listFood dl Join ListFood lf on dl.ListFood_ID = lf.ListFood_ID
+        WHERE diary_id = ?
+      ),
+      protein_consumed = (
+        SELECT 
+          COALESCE(SUM(ListFood_protein), 0)
+        FROM diary_listFood dl Join ListFood lf on dl.ListFood_ID = lf.ListFood_ID
+        WHERE diary_id = ?
+      ),
+      fat_consumed = (
+        SELECT 
+          COALESCE(SUM(ListFood_fat), 0)
+        FROM diary_listFood dl Join ListFood lf on dl.ListFood_ID = lf.ListFood_ID
+        WHERE diary_id = ?
+      )
+    WHERE diary_id = ?;
+  `;
+  return new Promise((resolve, reject) => {
+    connection.query(updateQuery, [diaryId, diaryId, diaryId, diaryId, diaryId], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};
 // Lấy tổng giá trị dinh dưỡng của tất cả bữa ăn trong 1 ngày
 const getTotalNutrition = (diaryId) => {
   return new Promise((resolve, reject) => {
@@ -168,15 +232,13 @@ const findListFood = (diaryId, mealId) => {
 const getFoodByID = (foodId, ListFoodId) => {
   return new Promise((resolve, reject) => {
     const query = `
-      SELECT f.name, lff.portion, lff.size, lf.ListFood_calories, 
-      lf.ListFood_carbs, lf.ListFood_protein, lf.ListFood_fat
-      FROM food f Join ListFood_food lff on f.food_id = lff.food_id 
-      Join ListFood lf on lff.ListFood_id = lf.ListFood_id
-      WHERE lff.food_id = ? AND lff.ListFood_id = ?;
+        SELECT *
+        FROM ListFood_food 
+        WHERE ListFood_id = ? AND food_id = ?
     `;
-    connection.query(query, [foodId, ListFoodId], (err, results) => {
+    connection.query(query, [ListFoodId, foodId], (err, results) => {
       if (err) {
-        reject(err);
+        reject(err)
       } else {
         resolve(results[0]);
       }
@@ -207,6 +269,8 @@ module.exports = {
   insertFoodInMeal,
   removeFoodFromMeal,
   updateMealNutrition,
+  updateDiaryNutrition,
+  updateFoodNutrition,
 
   getTotalNutrition,
   getListFoodByID,

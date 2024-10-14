@@ -10,10 +10,12 @@ const addFoodToMeal = async (req, res) => {
     // Thêm món ăn vào meal
     await mealModel.insertFoodInMeal(foodId, ListFoodId, portion, size);
     // Cập nhật lại dinh dưỡng tổng trong danh sách
+    await mealModel.updateFoodNutrition(ListFoodId, foodId);
     await mealModel.updateMealNutrition(ListFoodId);
+    await mealModel.updateDiaryNutrition(diaryId);
     // Truy vấn lấy dữ liệu của ListFood sau khi đã cập nhật
     const updatedListFood = await mealModel.getListFoodByID(ListFoodId);
-
+    
     return res.status(200).json({
       message: 'Food added successfully',
       updatedListFood: updatedListFood // Trả về dữ liệu ListFood sau khi đã cập nhật
@@ -35,7 +37,7 @@ const removeFoodFromMeal = async (req, res) => {
     await mealModel.removeFoodFromMeal(foodId, ListFoodId);
     // Cập nhật lại dinh dưỡng tổng cho meal
     await mealModel.updateMealNutrition(ListFoodId);
-
+    await mealModel.updateDiaryNutrition(diaryId);
     return res.status(200).json({ message: 'Food removed successfully' });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -53,6 +55,7 @@ const updatePortionSize = async (req, res) => {
     await mealModel.UpdatePortionSize(portion, size, foodId, ListFoodId);
     // Cập nhật lại dinh dưỡng tổng cho meal
     await mealModel.updateMealNutrition(ListFoodId);
+    await mealModel.updateDiaryNutrition(diaryId);
     return res.status(200).json({ message: 'Update successfully' });
   } catch (error) {
     return res.status(500).json({ error: error.message });
