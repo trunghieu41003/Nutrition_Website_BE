@@ -1,8 +1,7 @@
 const connection = require('../config/database');
 
-
 // Thêm một thực phẩm vào bữa ăn
-const insertFoodInMeal = (foodId, ListFood_ID, portion, size) => {
+const insertFoodInList = (foodId, ListFood_ID, portion, size) => {
   const insertQuery = `
     INSERT INTO ListFood_food (food_id, ListFood_ID, portion, size)
     VALUES (?, ?, ?, ?)
@@ -18,9 +17,8 @@ const insertFoodInMeal = (foodId, ListFood_ID, portion, size) => {
   });
 };
 
-
 // Xóa một thực phẩm khỏi bữa ăn với ListFood_ID được truyền trực tiếp
-const removeFoodFromMeal = (foodId, ListFood_ID) => {
+const removeFoodFromList = (foodId, ListFood_ID) => {
   const deleteQuery = `
     DELETE FROM ListFood_food
     WHERE food_id = ? AND ListFood_ID = ?;
@@ -36,58 +34,32 @@ const removeFoodFromMeal = (foodId, ListFood_ID) => {
   });
 };
 
-
-/*// Kiểm tra xem món ăn đã tồn tại trong bữa ăn hay chưa
-const checkFoodInMeal = (foodId, diaryId, ListFoodId) => {
-  const query = `
-    SELECT COUNT(*) AS count
-    FROM ListFood_food lff
-    JOIN Diary_ListFood dl ON lff.ListFood_ID = dl.ListFood_ID
-    JOIN ListFood lf ON lf.ListFood_id = lf.ListFood_id
-    WHERE lff.food_id = ? AND dl.diary_id = ? AND lf.ListFood_id = ?
-  `;
-  
-  return new Promise((resolve, reject) => {
-    connection.query(query, [foodId, diaryId, ListFoodId], (err, results) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(results[0].count > 0); // Trả về true nếu món ăn tồn tại, ngược lại false
-      }
-    });
-  });
-};*/
-
-const updateMealNutrition = (ListFoodId) => {
+const updateListFoodNutrition = (ListFoodId) => {
   const updateQuery = `
     UPDATE ListFood lf
     SET 
       lf.ListFood_calories = (
         SELECT 
-          COALESCE(SUM((f.calories * lff.size) / f.serving_size * lff.portion), 0)
+          COALESCE(SUM(lff.calories), 0)
         FROM ListFood_food lff
-        JOIN Food f ON lff.food_id = f.food_id
         WHERE lf.ListFood_id = ?
       ),
       lf.ListFood_carbs = (
         SELECT 
-          COALESCE(SUM((f.carbs * lff.size) / f.serving_size * lff.portion), 0)
+          COALESCE(SUM(lff.carbs), 0)
         FROM ListFood_food lff
-        JOIN Food f ON lff.food_id = f.food_id
         WHERE lf.ListFood_id = ?
       ),
       lf.ListFood_protein = (
         SELECT 
-          COALESCE(SUM((f.protein * lff.size) / f.serving_size * lff.portion), 0)
+          COALESCE(SUM(lff.protein), 0)
         FROM ListFood_food lff
-        JOIN Food f ON lff.food_id = f.food_id
         WHERE lf.ListFood_id = ?
       ),
       lf.ListFood_fat = (
         SELECT 
-          COALESCE(SUM((f.fat * lff.size) / f.serving_size * lff.portion), 0)
+          COALESCE(SUM(lff.fat), 0)
         FROM ListFood_food lff
-        JOIN Food f ON lff.food_id = f.food_id
         WHERE lf.ListFood_id = ?
       )
     WHERE lf.ListFood_ID = ?;
@@ -125,9 +97,7 @@ const updateFoodNutrition = (ListFoodId, foodId) => {
   });
 };
 
-
-
-const updateDiaryNutrition = (diaryId) => {
+const updateNutritionConsumed = (diaryId) => {
   const updateQuery = `
     UPDATE diary 
     SET 
@@ -167,23 +137,47 @@ const updateDiaryNutrition = (diaryId) => {
     });
   });
 };
-// Lấy tổng giá trị dinh dưỡng của tất cả bữa ăn trong 1 ngày
-const getTotalNutrition = (diaryId) => {
+
+const updateNutritionRemain = (diaryId, ListFoodId, foodId) => {
+  const updateQuery = `
+    UPDATE diary 
+    SET 
+      calories_remaining = (
+        SELECT 
+          COALESCE(calories_remaining - lff.calories, 0)
+        FROM diary d Join diary_ListFood dl on d.diary_id = dl.diary_id
+        Join ListFood_food lff on dl.ListFood_id = lff.ListFood_id
+        WHERE lff.ListFood_id = ? AND lff.food_id = ? 
+      ),
+      carbs_remaining = (
+         SELECT 
+          COALESCE(carbs_remaining - lff.calories, 0)
+        FROM diary d Join diary_ListFood dl on d.diary_id = dl.diary_id
+        Join ListFood_food lff on dl.ListFood_id = lff.ListFood_id
+        WHERE lff.ListFood_id = ? AND lff.food_id = ? 
+      ),
+      protein_remaining = (
+         SELECT 
+          COALESCE(protein_remaining - lff.calories, 0)
+        FROM diary d Join diary_ListFood dl on d.diary_id = dl.diary_id
+        Join ListFood_food lff on dl.ListFood_id = lff.ListFood_id
+        WHERE lff.ListFood_id = ? AND lff.food_id = ? 
+      ),
+      fat_remaining = (
+         SELECT 
+          COALESCE(fat_remaining - lff.calories, 0)
+        FROM diary d Join diary_ListFood dl on d.diary_id = dl.diary_id
+        Join ListFood_food lff on dl.ListFood_id = lff.ListFood_id
+        WHERE lff.ListFood_id = ? AND lff.food_id = ? 
+      )
+    WHERE diary_id = ?;
+  `;
   return new Promise((resolve, reject) => {
-    const query = `
-      SELECT 
-        SUM(ListFood_calories) AS total_calories,
-        SUM(ListFood_carbs) AS total_carbs,
-        SUM(ListFood_protein) AS total_protein,
-        SUM(ListFood_fat) AS total_fat
-      FROM ListFood l JOIN diary_listFood dl on l.ListFood_id = dl.ListFood_id
-      WHERE dl.diary_id = ?;
-    `;
-    connection.query(query, [diaryId], (err, results) => {
+    connection.query(updateQuery, [ ListFoodId, foodId, ListFoodId, foodId, ListFoodId, foodId, ListFoodId, foodId, diaryId], (err, results) => {
       if (err) {
         reject(err);
       } else {
-        resolve(results[0]); // Trả về hàng đầu tiên chứa tổng dinh dưỡng
+        resolve(results);
       }
     });
   });
@@ -207,7 +201,6 @@ const getListFoodByID = (ListFoodId) => {
   });
 };
 
-
 const findListFood = (diaryId, mealId) => {
   return new Promise((resolve, reject) => {
     const query = `
@@ -228,7 +221,6 @@ const findListFood = (diaryId, mealId) => {
 };
 
 
-
 const getFoodByID = (foodId, ListFoodId) => {
   return new Promise((resolve, reject) => {
     const query = `
@@ -245,8 +237,6 @@ const getFoodByID = (foodId, ListFoodId) => {
     });
   });
 };
-
-
 
 const UpdatePortionSize = (portion, size, foodId, ListFoodId) => {
   return new Promise((resolve, reject) => {
@@ -265,20 +255,46 @@ const UpdatePortionSize = (portion, size, foodId, ListFoodId) => {
   });
 };
 
+// Lưu dinh dưỡng cần nạp theo chế độ vào bảng Diary
+const saveDiaryEntry = (userId, adjustedTDEE, macros) => {
+  return new Promise((resolve, reject) => {
+      const { protein, carbs, fat } = macros;
+      const query = `
+      INSERT INTO Diary (date, calories_remaining, protein_remaining, carbs_remaining, fat_remaining, user_id)
+      VALUES (CURDATE(), ?, ?, ?, ?, ?)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+  `;
+    connection.query(query, [adjustedTDEE, protein, carbs, fat, userId], (err, results) => {
+      if (err) reject(err);
+      else resolve(results);
+    });
+  });
+};
+
+
+// Tạo mới 1 diary khi người dùng nhập date mới
+const newDiary = (date, userId) => {
+  return new Promise((resolve, reject) => {
+      const query = `
+      INSERT INTO Diary (date, userId)
+      VALUES (?, ?)
+  `;
+    connection.query(query, [date, userId], (err, results) => {
+      if (err) reject(err);
+      else resolve(results);
+    });
+  });
+};
 module.exports = {
-  insertFoodInMeal,
-  removeFoodFromMeal,
-  updateMealNutrition,
-  updateDiaryNutrition,
+  insertFoodInList,
+  removeFoodFromList,
+  updateListFoodNutrition,
+  updateNutritionConsumed,
+  updateNutritionRemain,
   updateFoodNutrition,
-
-  getTotalNutrition,
   getListFoodByID,
-
   findListFood,
   getFoodByID,
-
-  UpdatePortionSize 
-
-  //checkFoodInMeal,
+  UpdatePortionSize,
+  saveDiaryEntry,
+  newDiary 
 };

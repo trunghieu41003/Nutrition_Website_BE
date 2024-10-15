@@ -13,6 +13,19 @@ const findUserByEmail = (email) => {
   });
 };
 
+
+// Tìm người dùng theo ID
+const findUserByID = (userId) => {
+  return new Promise((resolve, reject) => {
+      connection.query('SELECT * FROM User WHERE user_id = ?', [userId], (err, results) => {
+          if (err) {
+              return reject(err);
+          }
+          resolve(results[0]); // Nếu không có lỗi, trả về kết quả tìm thấy
+      });
+  });
+};
+
 // Tạo người dùng mới
 const createUser = (userData) => {
   return new Promise((resolve, reject) => {
@@ -60,5 +73,6 @@ module.exports = {
   updateUser,
   findUserByEmail,
   createUser,
-  getCaloriesGoal
+  getCaloriesGoal,
+  findUserByID
 };

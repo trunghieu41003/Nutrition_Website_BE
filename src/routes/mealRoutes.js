@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const mealController = require('../controllers/mealController');
-
+const mealController = require('../controllers/myMealController');
 // Thêm món ăn vào danh sách
 router.post('/diaries/:diaryId/meals/:mealId/foods/:foodId', mealController.addFoodToMeal);
 
@@ -18,7 +17,6 @@ router.get('/diaries/:diaryId/meals/:mealId/nutritions', mealController.getNutri
 //router.get('/diaries/:diaryId/nutritions', mealController.getNutrition);
 
 router.get('/diaries/:diaryId/meals/:mealId/foods/:foodId', mealController.getfoodInformation);
-
 
 module.exports = router;
 

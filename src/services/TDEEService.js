@@ -1,5 +1,5 @@
 // services/TDEEService.js
-const diaryModel = require('../models/diaryModel');
+const myMealModel = require('../models/myMealModel');
 const goalModel = require('../models/goalModel');
 // Hàm tính TDEE dựa trên các thông tin của người dùng
 const calculateTDEE = (user) => {
@@ -81,7 +81,7 @@ const updateUserTDEEAndDiary = async (userId, user, goal, goalId) => {
     const daytogoal = daytoGoal(user, goal);
     await goalModel.updatedaytoGoal(goalId, daytogoal);
     // Gọi model để lưu kết quả vào bảng Diary
-    await diaryModel.saveDiaryEntry(userId, adjustedTDEE, macros);
+    await myMealModel.saveDiaryEntry(userId, adjustedTDEE, macros);
 };
 
 module.exports = {

@@ -12,5 +12,4 @@ router.post('/logout', (req, res) => {
     // Để thông báo logout thành công
     res.status(200).json({ message: 'Logout thành công' });
 });
-router.get('calories')
 module.exports = router;
