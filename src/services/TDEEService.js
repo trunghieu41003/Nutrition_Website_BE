@@ -68,7 +68,7 @@ const daytoGoal = (user, goal) => {
 
 
 // Hàm tổng hợp xử lý logic và lưu kết quả vào nhật ký (diary)
-const updateUserTDEEAndDiary = async (userId, user, goal, goalId) => {
+const updateUserTDEEAndDiary = async (diaryId, userId, user, goal, goalId) => {
 
     if (!user || !goal) throw new Error('Không tìm thấy user hoặc goal');
 
@@ -81,7 +81,7 @@ const updateUserTDEEAndDiary = async (userId, user, goal, goalId) => {
     const daytogoal = daytoGoal(user, goal);
     await goalModel.updatedaytoGoal(goalId, daytogoal);
     // Gọi model để lưu kết quả vào bảng Diary
-    await myMealModel.saveDiaryEntry(userId, adjustedTDEE, macros);
+    await myMealModel.saveDiaryEntry(diaryId, adjustedTDEE, macros);
 };
 
 module.exports = {

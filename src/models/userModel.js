@@ -67,7 +67,6 @@ const getCaloriesGoal = (userId) => {
   });
 };
 
-
 module.exports = {
   createUser,
   updateUser,

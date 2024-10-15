@@ -1,13 +1,14 @@
 // src/controller/UserController.js
 const UserModel = require('../models/userModel');
 const goalModel = require('../models/goalModel');
+const mealModel = require('../models/myMealModel');
 const TDEEService = require('../services/TDEEService');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 // Xử lý đăng ký người dùng
 const signUp = async (req, res) => {
-  const { name, email, password, height, weight, birthday, gender, activity_level, goal_type, weight_goal } = req.body;
+  const { date, name, email, password, height, weight, birthday, gender, activity_level, goal_type, weight_goal } = req.body;
 
   try {
       // Kiểm tra xem email đã tồn tại hay chưa
@@ -28,8 +29,9 @@ const signUp = async (req, res) => {
 
       // Liên kết người dùng với mục tiêu
       await goalModel.linkUserGoal(newGoal.goalId, newUser.userId );
-
-      await TDEEService.updateUserTDEEAndDiary(newUser.userId, newUser, newGoal, newGoal.goalId);
+      const newDiary = await mealModel.newDiary(date, newUser.userId);
+      
+      await TDEEService.updateUserTDEEAndDiary(newDiary.diaryId, newUser.userId, newUser, newGoal, newGoal.goalId);
 
       const calories = await UserModel.getCaloriesGoal(newUser.userId);
       const daytoGoal = await goalModel.getGoalinformation(newGoal.goalId);
@@ -56,10 +58,9 @@ const logIn = async (req, res) => {
       if (!validPassword) {
           return res.status(401).json({ message: 'Mật khẩu không đúng' });
       }
-
+      
       // Tạo token hoặc session
       const token = jwt.sign({ userId: user.user_id, email: user.email }, 'secret_key', { expiresIn: '1h' });
-
       res.status(200).json({ message: 'Đăng nhập thành công', token });
   } catch (error) {
       res.status(500).json({ message: 'Lỗi khi đăng nhập', error: error.message });

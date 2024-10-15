@@ -51,10 +51,30 @@ const getGoalinformation = (goalId) => {
     });
 };
 
+const findGoalbyUser = (userId) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT * FROM goal 
+      WHERE goal_id IN (
+        SELECT ug.goal_id
+        FROM goal g 
+        JOIN user_goal ug ON g.goal_id = ug.goal_id
+        WHERE user_id = ?
+      )
+    `;
+    connection.query(query, [userId], (err, results) => {
+      if (err) reject(err);
+      else resolve(results);  // Trả về kết quả từ DB
+    });
+  });
+};
+
+
 module.exports = {
     newGoal,
     updateGoal,
     linkUserGoal,
     updatedaytoGoal,
-    getGoalinformation
+    getGoalinformation,
+    findGoalbyUser
 };

@@ -1,6 +1,8 @@
 // src/controllers/mealController.js
 const mealModel = require('../models/myMealModel');
 const userModel = require('../models/userModel');
+const TDEEService = require('../services/TDEEService');
+const goalModel = require('../models/goalModel');
 //Thêm 1 món ăn vào meal
 const addFoodToMeal = async (req, res) => {
   const { mealId, foodId, diaryId } = req.params;
@@ -85,13 +87,16 @@ const getfoodInformation= async (req, res) => {
 
 //Thêm mới 1 diary
 const addNewDiary= async (req, res) => {
-  const { diaryId } = req.params; 
+  const { userId } = req.params; 
+  const date = req.body;
   try {
-    await userModel.findUserByID(userId)
-    await mealModel.newDiary(date, userId)
-    const ListFoodId = await mealModel.findListFood(diaryId, mealId);
-    const foodNutrition = await mealModel.getFoodByID(foodId,ListFoodId);
-    return res.status(200).json({ message: 'Get Successfully ', food: foodNutrition});
+    const newdiary = await mealModel.newDiary(date, userId);
+    const user = await userModel.findUserByID(userId);
+    const goal = await goalModel.findGoalbyUser(userId);
+    const goalId = goal.map(goal => goal.goal_id);
+    await TDEEService.updateUserTDEEAndDiary(newdiary.diaryId, userId, user, goal, goalId);
+
+    return res.status(200).json({ message: 'Add Successfully '});
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

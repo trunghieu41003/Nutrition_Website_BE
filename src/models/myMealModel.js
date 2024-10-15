@@ -214,7 +214,7 @@ const findListFood = (diaryId, mealId) => {
       if (err) {
         reject(err);
       } else {
-        resolve(results[0].ListFood_ID);
+        resolve(results[0]);
       }
     });
   });
@@ -256,14 +256,18 @@ const UpdatePortionSize = (portion, size, foodId, ListFoodId) => {
 };
 
 // Lưu dinh dưỡng cần nạp theo chế độ vào bảng Diary
-const saveDiaryEntry = (userId, adjustedTDEE, macros) => {
+const saveDiaryEntry = (diaryId, adjustedTDEE, macros) => {
   return new Promise((resolve, reject) => {
       const { protein, carbs, fat } = macros;
       const query = `
-      INSERT INTO Diary (date, calories_remaining, protein_remaining, carbs_remaining, fat_remaining, user_id)
-      VALUES (CURDATE(), ?, ?, ?, ?, ?)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+      Update diary set 
+      calories_remaining = ?, 
+      protein_remaining = ?,
+      carbs_remaining = ?,
+      fat_remaining =?
+      where diary_id = ?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
   `;
-    connection.query(query, [adjustedTDEE, protein, carbs, fat, userId], (err, results) => {
+    connection.query(query, [adjustedTDEE, protein, carbs, fat, diaryId], (err, results) => {
       if (err) reject(err);
       else resolve(results);
     });
@@ -275,15 +279,16 @@ const saveDiaryEntry = (userId, adjustedTDEE, macros) => {
 const newDiary = (date, userId) => {
   return new Promise((resolve, reject) => {
       const query = `
-      INSERT INTO Diary (date, userId)
+      INSERT INTO Diary (date, user_id)
       VALUES (?, ?)
   `;
     connection.query(query, [date, userId], (err, results) => {
       if (err) reject(err);
-      else resolve(results);
+      else resolve({diaryId: results.insertId});
     });
   });
 };
+
 module.exports = {
   insertFoodInList,
   removeFoodFromList,
