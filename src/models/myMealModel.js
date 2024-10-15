@@ -142,38 +142,40 @@ const updateNutritionRemain = (diaryId, ListFoodId, foodId) => {
   const updateQuery = `
     UPDATE diary 
     SET 
-      calories_remaining = (
-        SELECT 
-          COALESCE(calories_remaining - lff.calories, 0)
-        FROM diary d Join diary_ListFood dl on d.diary_id = dl.diary_id
-        Join ListFood_food lff on dl.ListFood_id = lff.ListFood_id
-        WHERE lff.ListFood_id = ? AND lff.food_id = ? 
-      ),
-      carbs_remaining = (
-         SELECT 
-          COALESCE(carbs_remaining - lff.calories, 0)
-        FROM diary d Join diary_ListFood dl on d.diary_id = dl.diary_id
-        Join ListFood_food lff on dl.ListFood_id = lff.ListFood_id
-        WHERE lff.ListFood_id = ? AND lff.food_id = ? 
-      ),
-      protein_remaining = (
-         SELECT 
-          COALESCE(protein_remaining - lff.calories, 0)
-        FROM diary d Join diary_ListFood dl on d.diary_id = dl.diary_id
-        Join ListFood_food lff on dl.ListFood_id = lff.ListFood_id
-        WHERE lff.ListFood_id = ? AND lff.food_id = ? 
-      ),
-      fat_remaining = (
-         SELECT 
-          COALESCE(fat_remaining - lff.calories, 0)
-        FROM diary d Join diary_ListFood dl on d.diary_id = dl.diary_id
-        Join ListFood_food lff on dl.ListFood_id = lff.ListFood_id
-        WHERE lff.ListFood_id = ? AND lff.food_id = ? 
-      )
+      calories_remaining = COALESCE(calories_remaining - (
+        SELECT COALESCE(SUM(lff.calories), 0)
+        FROM diary_ListFood dl 
+        JOIN ListFood_food lff ON dl.ListFood_id = lff.ListFood_id
+        WHERE dl.diary_id = ? AND lff.food_id = ?
+      ), 0),
+      carbs_remaining = COALESCE(carbs_remaining - (
+        SELECT COALESCE(SUM(lff.carbs), 0)
+        FROM diary_ListFood dl 
+        JOIN ListFood_food lff ON dl.ListFood_id = lff.ListFood_id
+        WHERE dl.diary_id = ? AND lff.food_id = ?
+      ), 0),
+      protein_remaining = COALESCE(protein_remaining - (
+        SELECT COALESCE(SUM(lff.protein), 0)
+        FROM diary_ListFood dl 
+        JOIN ListFood_food lff ON dl.ListFood_id = lff.ListFood_id
+        WHERE dl.diary_id = ? AND lff.food_id = ?
+      ), 0),
+      fat_remaining = COALESCE(fat_remaining - (
+        SELECT COALESCE(SUM(lff.fat), 0)
+        FROM diary_ListFood dl 
+        JOIN ListFood_food lff ON dl.ListFood_id = lff.ListFood_id
+        WHERE dl.diary_id = ? AND lff.food_id = ?
+      ), 0)
     WHERE diary_id = ?;
   `;
   return new Promise((resolve, reject) => {
-    connection.query(updateQuery, [ ListFoodId, foodId, ListFoodId, foodId, ListFoodId, foodId, ListFoodId, foodId, diaryId], (err, results) => {
+    connection.query(updateQuery, [
+      diaryId, foodId, // calories_remaining
+      diaryId, foodId, // carbs_remaining
+      diaryId, foodId, // protein_remaining
+      diaryId, foodId, // fat_remaining
+      diaryId          // diary_id
+    ], (err, results) => {
       if (err) {
         reject(err);
       } else {
@@ -182,6 +184,7 @@ const updateNutritionRemain = (diaryId, ListFoodId, foodId) => {
     });
   });
 };
+
 
 // Lấy dinh dưỡng của một danh sách theo ID
 const getListFoodByID = (ListFoodId) => {
@@ -214,7 +217,7 @@ const findListFood = (diaryId, mealId) => {
       if (err) {
         reject(err);
       } else {
-        resolve(results[0]);
+        resolve(results[0].ListFood_ID);
       }
     });
   });
