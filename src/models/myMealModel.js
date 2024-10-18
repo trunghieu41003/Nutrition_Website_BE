@@ -142,9 +142,9 @@ const decreaseNutritionRemain = (ListFoodId, foodId, diaryId) => {
   const updateQuery = `
     UPDATE diary 
 SET 
-  calories_remaining = GREATEST(0, COALESCE(calories_remaining, 0) - COALESCE(
+  calories_remaining = COALESCE(calories_remaining, 0) - COALESCE(
     (SELECT calories FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
-  )),
+  ),
   carbs_remaining = COALESCE(carbs_remaining, 0) - COALESCE(
     (SELECT carbs FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
   ), 
@@ -155,7 +155,6 @@ SET
     (SELECT fat FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
   )
 WHERE diary_id = ?;
-
 
   `;
   return new Promise((resolve, reject) => {
@@ -179,9 +178,9 @@ const increaseNutritionRemain = (ListFoodId, foodId, diaryId) => {
   const updateQuery = `
     UPDATE diary 
 SET 
-  calories_remaining = GREATEST(0, COALESCE(calories_remaining, 0) + COALESCE(
+  calories_remaining = COALESCE(calories_remaining, 0) + COALESCE(
     (SELECT calories FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
-  )),
+  ),
   carbs_remaining = COALESCE(carbs_remaining, 0) + COALESCE(
     (SELECT carbs FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
   ), 
@@ -347,6 +346,43 @@ const findFoodIdByDiaryId = (diaryId) => {
   });
 };
 
+
+const updateNutritionRemain = (diaryId) => {
+  const updateQuery = `
+    UPDATE diary 
+SET 
+  calories_remaining = COALESCE(calories_remaining, 0) - COALESCE(
+    (SELECT Sum(ListFood_calories) FROM ListFood WHERE diary_id = ?), 0
+  ),
+  carbs_remaining = COALESCE(carbs_remaining, 0) - COALESCE(
+    (SELECT Sum(ListFood_carbs) FROM ListFood WHERE diary_id = ?), 0
+  ), 
+  protein_remaining = COALESCE(protein_remaining, 0) - COALESCE(
+    (SELECT Sum(ListFood_protein) FROM ListFood WHERE diary_id = ?), 0
+  ), 
+  fat_remaining = COALESCE(fat_remaining, 0) + COALESCE(
+    (SELECT Sum(ListFood_fat) FROM ListFood WHERE diary_id = ?), 0
+  )
+WHERE diary_id = ?;
+
+  `;
+  return new Promise((resolve, reject) => {
+    connection.query(updateQuery, [
+      diaryId, // calories_remaining
+      diaryId, // carbs_remaining
+      diaryId, // protein_remaining
+      diaryId, // fat_remaining
+      diaryId
+    ], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};
+
 module.exports = {
   insertFoodInList,
   removeFoodFromList,
@@ -362,5 +398,6 @@ module.exports = {
   saveDiaryEntry,
   newDiary,
   getDiary,
-  findFoodIdByDiaryId
+  findFoodIdByDiaryId,
+  updateNutritionRemain,
 };

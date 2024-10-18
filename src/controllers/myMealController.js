@@ -31,7 +31,6 @@ const addFoodToMeal = async (req, res) => {
 // Xóa 1 món ăn khỏi meal
 const removeFoodFromMeal = async (req, res) => {
   const { mealId, foodId, diaryId  } = req.params;
-  
   try {
     const ListFoodId = await mealModel.findListFood(diaryId, mealId);
     await mealModel.increaseNutritionRemain(ListFoodId, foodId, diaryId);
@@ -105,7 +104,7 @@ const addNewDiary= async (req, res) => {
     const goal = await goalModel.findGoalbyUser(userId);
     const goalId = goal.goal_id;
     console.log({diaryId:newdiary.diaryId, user:user, goal:goal, goalId: goalId});
-    await TDEEService.updateUserTDEEAndDiary(newdiary.diaryId, user, goal, goalId);
+    await TDEEService.updateUserTDEEAndDiary(userId, newdiary.diaryId, user, goal, goalId);
     return res.status(200).json({ message: 'Add Successfully '});
   } catch (error) {
     return res.status(500).json({ error: error.message });

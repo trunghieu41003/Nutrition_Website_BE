@@ -69,7 +69,7 @@ const daytoGoal = (user, goal) => {
 
 
 // Hàm tổng hợp xử lý logic và lưu kết quả vào nhật ký (diary)
-const updateUserTDEEAndDiary = async (diaryId, user, goal, goalId) => {
+const updateUserTDEEAndDiary = async (userId, diaryId, user, goal, goalId) => {
 
     if (!user || !goal) throw new Error('Không tìm thấy user hoặc goal');
 
@@ -79,7 +79,7 @@ const updateUserTDEEAndDiary = async (diaryId, user, goal, goalId) => {
     console.log ({AdjustTDEE: adjustedTDEE});
     // Tính toán macro dinh dưỡng dựa trên TDEE điều chỉnh
     const macros = calculateMacros(adjustedTDEE);
-    //await UserModel.updateCaloriesDaily(userId, adjustedTDEE);
+    await UserModel.updateCaloriesDaily(userId, adjustedTDEE);
     const daytogoal = daytoGoal(user, goal);
     await goalModel.updatedaytoGoal(goalId, daytogoal);
     // Gọi model để lưu kết quả vào bảng Diary

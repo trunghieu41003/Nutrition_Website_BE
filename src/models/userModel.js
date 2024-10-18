@@ -70,55 +70,67 @@ const getCaloriesGoal = (userId) => {
 };
 
 
-const updateUserInformation = (userId, userData) => {
+const updateUserInformation = (userId, user) => {
   return new Promise((resolve, reject) => {
-      let query = 'UPDATE user SET ';
-      let params = [];
+    let query = 'UPDATE user SET ';
+    let params = [];
+    let setClause = []; // Mảng để lưu các điều kiện set
 
-      // Building the query dynamically
-      if (userData.gender) {
-          query += 'gender = ?, ';
-          params.push(userData.gender);
-      }
-      if (userData.birthday) {
-          query += 'birthday = ?, ';
-          params.push(userData.birthday);
-      }
-      if (userData.weight) {
-          query += 'weight = ?, ';
-          params.push(userData.weight);
-      }
-      if (userData.height) {
-          query += 'height = ?, ';
-          params.push(userData.height);
-      }
-      if (userData.activity_level) {
-          query += 'activity_level = ?, ';
-          params.push(userData.activity_level);
-      }
+    // Xây dựng câu truy vấn động
+    if (user.weight) {
+      setClause.push('weight = ?');
+      params.push(user.weight);
+    }
+    if (user.height) {
+      setClause.push('height = ?');
+      params.push(user.height);
+    }
 
-      // Remove the last comma and space
-      query = query.slice(0, -2); // Remove the last two characters (comma + space)
+    if (user.birthday) {
+      setClause.push('birthday = ?');
+      params.push(user.birthday);
+    }
+    if (user.gender) {
+      setClause.push('gender = ?');
+      params.push(user.gender);
+    }
+    if (user.activity_level) {
+      setClause.push('activity_level = ?');
+      params.push(user.activity_level);
+    }
+    if (user.name) {
+      setClause.push('name = ?');
+      params.push(user.name);
+    }
+    // Nếu không có trường nào để cập nhật, chỉ cần resolve mà không thực hiện truy vấn
+    if (setClause.length === 0) {
+      return resolve({ message: 'Không có trường nào để cập nhật, không thực hiện thay đổi.' });
+    }
 
-      // Add the WHERE clause
-      query += ' WHERE user_id = ?';
-      params.push(userId);
+    // Kết hợp các điều kiện set thành một chuỗi
+    query += setClause.join(', '); // Thêm điều kiện vào câu truy vấn
 
-      // Execute the query
-      connection.query(query, params, (error, results) => {
-          if (error) {
-              console.error('Error updating user information:', error); // Log error
-              return reject(error); // Reject the promise on error
-          }
-          resolve(results); // Resolve with the results if successful
-      });
+    // Thêm điều kiện WHERE
+    query += ' WHERE user_id = ?';
+    params.push(userId);
+
+    // Thực hiện truy vấn
+    connection.query(query, params, (error, results) => {
+      if (error) {
+        console.error('Error updating user information:', error); // Log error
+        return reject(error); // Reject the promise on error
+      }
+      resolve(results); // Resolve với kết quả nếu thành công
+    });
   });
 };
 
 
 const getUserDiary = (userId) => {
   return new Promise((resolve, reject) => {
-    const getQuery = 'SELECT diary_id From diary where user_id = ?';
+    // Câu truy vấn SQL với điều kiện ngày >= ngày hiện tại
+    const getQuery = 'SELECT diary_id FROM diary WHERE user_id = ? AND date >= CURDATE()';
+    // Thực hiện truy vấn
     connection.query(getQuery, [userId], (err, results) => {
       if (err) reject(err);
       else resolve(results);
@@ -126,10 +138,11 @@ const getUserDiary = (userId) => {
   });
 };
 
+
 const updateCaloriesDaily = (userId, CaloriesDaily) => {
   return new Promise((resolve, reject) => {
-    const getQuery = 'Update user SET calories_daily = ?';
-    connection.query(getQuery, [ userId, CaloriesDaily], (err, results) => {
+    const getQuery = 'Update user SET calories_daily = ? where user_id = ?';
+    connection.query(getQuery, [CaloriesDaily, userId], (err, results) => {
       if (err) reject(err);
       else resolve(results);
     });

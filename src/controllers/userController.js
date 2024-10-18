@@ -31,7 +31,7 @@ const signUp = async (req, res) => {
       await goalModel.linkUserGoal(newGoal.goalId, newUser.userId );
       const newDiary = await mealModel.newDiary(date, newUser.userId);
       
-      await TDEEService.updateUserTDEEAndDiary(newDiary.diaryId, newUser, newGoal, newGoal.goalId);
+      await TDEEService.updateUserTDEEAndDiary(newUser.userId,newDiary.diaryId, newUser, newGoal, newGoal.goalId);
       
       const calories = await UserModel.getCaloriesGoal(newUser.userId);
       const daytoGoal = await goalModel.getGoalinformation(newGoal.goalId);
@@ -83,22 +83,21 @@ const logout = (req, res) => {
 
 const updateUserInfo = async (req, res) => {
   const {userId} = req.params; 
-  const user = req.body; 
+  const userData = req.body; 
   const goalData = req.body;
 
   try {
     console.log('Received request to update user info for user ID:', userId); // Log initial request
     const goal = await goalModel.findGoalbyUser(userId);
-    const goalId = goal.map(goal => goal.goal_id);
-    console.log(goalId);
+    const user = await UserModel.findUserByID(userId);
+    const goalId = goal.goal_id;
+  
     // Update user information
-    await UserModel.updateUserInformation(userId, user);
+    await UserModel.updateUserInformation(userId, userData);
     console.log('Updated user information for user ID:', userId); // Log successful user info update
-
     // Update user goals
     await goalModel.updateUserGoal(goalId, goalData);
     console.log('Updated user goals for goal IDs:', goalId); // Log successful goal update
-
     // Get user diary
     const diary = await UserModel.getUserDiary(userId);
     console.log('Retrieved diary entries for user ID:', userId, diary); // Log retrieved diary entries
@@ -109,7 +108,7 @@ const updateUserInfo = async (req, res) => {
         console.log('Processing diary entry ID:', diaryEntry.diary_id); // Log current diary entry being processed
 
         // Update TDEE and diary
-        await TDEEService.updateUserTDEEAndDiary(diaryEntry.diary_id, user, goal, goalId);
+        await TDEEService.updateUserTDEEAndDiary(userId,diaryEntry.diary_id, user, goal, goalId);
         console.log('Updated TDEE and diary for diary entry ID:', diaryEntry.diary_id); // Log TDEE update
 
         // Update nutrition consumed
@@ -123,8 +122,7 @@ const updateUserInfo = async (req, res) => {
         if (food.length > 0) {
           food.forEach(async (foodEntry) => {
             console.log('Decreasing nutrition for food ID:', foodEntry.foodId, 'in diary ID:', diaryEntry.diary_id); // Log decrease operation
-            await mealModel.decreaseNutritionRemain(diaryEntry.diary_id, foodEntry.foodId);
-        
+            await mealModel.updateNutritionRemain(diaryEntry.diary_id);
           });
         }
       };
