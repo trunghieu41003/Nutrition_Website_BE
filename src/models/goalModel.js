@@ -57,24 +57,59 @@ const findGoalbyUser = (userId) => {
       SELECT * FROM goal 
       WHERE goal_id IN (
         SELECT ug.goal_id
-        FROM goal g 
-        JOIN user_goal ug ON g.goal_id = ug.goal_id
-        WHERE user_id = ?
+        FROM user_goal ug 
+        WHERE ug.user_id = ?
       )
-    `;
+    `;  
     connection.query(query, [userId], (err, results) => {
-      if (err) reject(err);
-      else resolve(results);  // Trả về kết quả từ DB
+      if (err) {
+        console.error('SQL Error:', err); // Log SQL error for debugging
+        return reject(err); // Return if there's an error
+      }
+      resolve(results[0]); // Resolve with the query results
     });
   });
 };
 
+// Update user goal function
+const updateUserGoal = (goalId, goal) => {
+  return new Promise((resolve, reject) => {
+    let query = 'UPDATE goal SET ';
+    let params = [];
 
+    // Building the query dynamically
+    if (goal.goal_type) {
+      query += 'goal_type = ?, ';
+      params.push(goal.goal_type);
+    }
+    if (goal.weight_goal) {
+      query += 'weight_goal = ?, ';
+      params.push(goal.weight_goal);
+    }
+
+    // Remove the last comma and space
+    query = query.slice(0, -2); // Remove the last comma and space
+
+    // Add the WHERE clause
+    query += ' WHERE goal_id = ?'; // Ensure correct column name (goal_id)
+    params.push(goalId);
+
+    // Execute the query
+    connection.query(query, params, (error, results) => {
+      if (error) {
+        console.error('Error updating user information:', error); // Log error
+        return reject(error); // Reject the promise on error
+      }
+      resolve(results); // Resolve with the results if successful
+    });
+  });
+};
 module.exports = {
     newGoal,
     updateGoal,
     linkUserGoal,
     updatedaytoGoal,
     getGoalinformation,
-    findGoalbyUser
+    findGoalbyUser,
+    updateUserGoal
 };

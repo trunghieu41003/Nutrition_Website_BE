@@ -21,7 +21,7 @@ const insertFoodInList = (foodId, ListFood_ID, portion, size) => {
 const removeFoodFromList = (foodId, ListFood_ID) => {
   const deleteQuery = `
     DELETE FROM ListFood_food
-    WHERE food_id = ? AND ListFood_ID = ?;
+    WHERE food_id = ? AND ListFood_Id = ?;
   `;
   return new Promise((resolve, reject) => {
     connection.query(deleteQuery, [foodId, ListFood_ID], (err, results) => {
@@ -42,30 +42,30 @@ const updateListFoodNutrition = (ListFoodId) => {
         SELECT 
           COALESCE(SUM(lff.calories), 0)
         FROM ListFood_food lff
-        WHERE lf.ListFood_id = ?
+        WHERE lff.ListFood_id = ?
       ),
       lf.ListFood_carbs = (
         SELECT 
           COALESCE(SUM(lff.carbs), 0)
         FROM ListFood_food lff
-        WHERE lf.ListFood_id = ?
+        WHERE lff.ListFood_id = ?
       ),
       lf.ListFood_protein = (
         SELECT 
           COALESCE(SUM(lff.protein), 0)
         FROM ListFood_food lff
-        WHERE lf.ListFood_id = ?
+        WHERE lff.ListFood_id = ?
       ),
       lf.ListFood_fat = (
         SELECT 
           COALESCE(SUM(lff.fat), 0)
         FROM ListFood_food lff
-        WHERE lf.ListFood_id = ?
+        WHERE lff.ListFood_id = ?
       )
     WHERE lf.ListFood_ID = ?;
   `;
   return new Promise((resolve, reject) => {
-    connection.query(updateQuery, [ListFoodId,ListFoodId,ListFoodId,ListFoodId,ListFoodId], (err, results) => {
+    connection.query(updateQuery, [ListFoodId, ListFoodId,ListFoodId,ListFoodId,ListFoodId], (err, results) => {
       if (err) {
         reject(err);
       } else {
@@ -138,43 +138,69 @@ const updateNutritionConsumed = (diaryId) => {
   });
 };
 
-const updateNutritionRemain = (diaryId, ListFoodId, foodId) => {
+const decreaseNutritionRemain = (ListFoodId, foodId, diaryId) => {
   const updateQuery = `
     UPDATE diary 
-    SET 
-      calories_remaining = COALESCE(calories_remaining - (
-        SELECT COALESCE(SUM(lff.calories), 0)
-        FROM diary_ListFood dl 
-        JOIN ListFood_food lff ON dl.ListFood_id = lff.ListFood_id
-        WHERE dl.diary_id = ? AND lff.food_id = ?
-      ), 0),
-      carbs_remaining = COALESCE(carbs_remaining - (
-        SELECT COALESCE(SUM(lff.carbs), 0)
-        FROM diary_ListFood dl 
-        JOIN ListFood_food lff ON dl.ListFood_id = lff.ListFood_id
-        WHERE dl.diary_id = ? AND lff.food_id = ?
-      ), 0),
-      protein_remaining = COALESCE(protein_remaining - (
-        SELECT COALESCE(SUM(lff.protein), 0)
-        FROM diary_ListFood dl 
-        JOIN ListFood_food lff ON dl.ListFood_id = lff.ListFood_id
-        WHERE dl.diary_id = ? AND lff.food_id = ?
-      ), 0),
-      fat_remaining = COALESCE(fat_remaining - (
-        SELECT COALESCE(SUM(lff.fat), 0)
-        FROM diary_ListFood dl 
-        JOIN ListFood_food lff ON dl.ListFood_id = lff.ListFood_id
-        WHERE dl.diary_id = ? AND lff.food_id = ?
-      ), 0)
-    WHERE diary_id = ?;
+SET 
+  calories_remaining = GREATEST(0, COALESCE(calories_remaining, 0) - COALESCE(
+    (SELECT calories FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+  )),
+  carbs_remaining = COALESCE(carbs_remaining, 0) - COALESCE(
+    (SELECT carbs FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+  ), 
+  protein_remaining = COALESCE(protein_remaining, 0) - COALESCE(
+    (SELECT protein FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+  ), 
+  fat_remaining = COALESCE(fat_remaining, 0) - COALESCE(
+    (SELECT fat FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+  )
+WHERE diary_id = ?;
+
+
   `;
   return new Promise((resolve, reject) => {
     connection.query(updateQuery, [
-      diaryId, foodId, // calories_remaining
-      diaryId, foodId, // carbs_remaining
-      diaryId, foodId, // protein_remaining
-      diaryId, foodId, // fat_remaining
+      ListFoodId, foodId, // calories_remaining
+      ListFoodId, foodId, // carbs_remaining
+      ListFoodId, foodId, // protein_remaining
+      ListFoodId, foodId, // fat_remaining
       diaryId          // diary_id
+    ], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};
+
+const increaseNutritionRemain = (ListFoodId, foodId, diaryId) => {
+  const updateQuery = `
+    UPDATE diary 
+SET 
+  calories_remaining = GREATEST(0, COALESCE(calories_remaining, 0) + COALESCE(
+    (SELECT calories FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+  )),
+  carbs_remaining = COALESCE(carbs_remaining, 0) + COALESCE(
+    (SELECT carbs FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+  ), 
+  protein_remaining = COALESCE(protein_remaining, 0) + COALESCE(
+    (SELECT protein FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+  ), 
+  fat_remaining = COALESCE(fat_remaining, 0) + COALESCE(
+    (SELECT fat FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+  )
+WHERE diary_id = ?;
+
+  `;
+  return new Promise((resolve, reject) => {
+    connection.query(updateQuery, [
+      ListFoodId, foodId, // calories_remaining
+      ListFoodId, foodId, // carbs_remaining
+      ListFoodId, foodId, // protein_remaining
+      ListFoodId, foodId, // fat_remaining
+      diaryId
     ], (err, results) => {
       if (err) {
         reject(err);
@@ -267,10 +293,10 @@ const saveDiaryEntry = (diaryId, adjustedTDEE, macros) => {
       calories_remaining = ?, 
       protein_remaining = ?,
       carbs_remaining = ?,
-      fat_remaining =?
+      fat_remaining = ?
       where diary_id = ?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
   `;
-    connection.query(query, [adjustedTDEE, protein, carbs, fat, diaryId], (err, results) => {
+    connection.query(query, [adjustedTDEE, protein, carbs, fat, diaryId,], (err, results) => {
       if (err) reject(err);
       else resolve(results);
     });
@@ -292,17 +318,49 @@ const newDiary = (date, userId) => {
   });
 };
 
+
+
+const getDiary = (date, userId) => {
+  return new Promise((resolve, reject) => {
+      const query = `
+      Select * From diary 
+      Where date = ? AND user_id = ?
+  `;
+    connection.query(query, [date, userId], (err, results) => {
+      if (err) reject(err);
+      else resolve(results);
+    });
+  });
+};
+
+const findFoodIdByDiaryId = (diaryId) => {
+  return new Promise((resolve, reject) => {
+      const query = `
+      Select lff.food_id From diary_ListFood dl Join 
+      Listfood_food lff on dl.ListFood_id = lff.ListFood_id
+      Where dl.diary_id = ?
+  `;
+    connection.query(query, [diaryId], (err, results) => {
+      if (err) reject(err);
+      else resolve(results);
+    });
+  });
+};
+
 module.exports = {
   insertFoodInList,
   removeFoodFromList,
   updateListFoodNutrition,
   updateNutritionConsumed,
-  updateNutritionRemain,
+  decreaseNutritionRemain,
+  increaseNutritionRemain,
   updateFoodNutrition,
   getListFoodByID,
   findListFood,
   getFoodByID,
   UpdatePortionSize,
   saveDiaryEntry,
-  newDiary 
+  newDiary,
+  getDiary,
+  findFoodIdByDiaryId
 };
