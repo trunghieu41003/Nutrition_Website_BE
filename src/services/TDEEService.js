@@ -1,6 +1,7 @@
 // services/TDEEService.js
 const myMealModel = require('../models/myMealModel');
 const goalModel = require('../models/goalModel');
+const UserModel = require('../models/userModel');
 // Hàm tính TDEE dựa trên các thông tin của người dùng
 const calculateTDEE = (user) => {
     const { weight, height, birthday, gender, activity_level } = user;
@@ -68,16 +69,17 @@ const daytoGoal = (user, goal) => {
 
 
 // Hàm tổng hợp xử lý logic và lưu kết quả vào nhật ký (diary)
-const updateUserTDEEAndDiary = async (diaryId, userId, user, goal, goalId) => {
+const updateUserTDEEAndDiary = async (userId, diaryId, user, goal, goalId) => {
 
     if (!user || !goal) throw new Error('Không tìm thấy user hoặc goal');
 
     // Tính toán TDEE và điều chỉnh theo mục tiêu
     const TDEE = calculateTDEE(user);
     const adjustedTDEE = adjustTDEEForGoal(TDEE, goal);
-
+    console.log ({AdjustTDEE: adjustedTDEE});
     // Tính toán macro dinh dưỡng dựa trên TDEE điều chỉnh
     const macros = calculateMacros(adjustedTDEE);
+    await UserModel.updateCaloriesDaily(userId, adjustedTDEE);
     const daytogoal = daytoGoal(user, goal);
     await goalModel.updatedaytoGoal(goalId, daytogoal);
     // Gọi model để lưu kết quả vào bảng Diary

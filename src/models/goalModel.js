@@ -44,7 +44,10 @@ const updatedaytoGoal = (goalId, daytoGoal) => {
 // Thêm một mục tiêu cho user
 const getGoalinformation = (goalId) => {
     return new Promise((resolve, reject) => {
-      connection.query('Select * FROM goal WHERE goal_id = ?', [goalId], (err, results) => {
+      const query = `
+      Select goal_type, weight_goal,DATE_FORMAT(days_to_goal, '%Y-%m-%d') AS date 
+      FROM goal WHERE goal_id = ?`
+      connection.query(query, [goalId], (err, results) => {
         if (err) reject(err);
         else resolve(results);
       });
@@ -57,18 +60,58 @@ const findGoalbyUser = (userId) => {
       SELECT * FROM goal 
       WHERE goal_id IN (
         SELECT ug.goal_id
-        FROM goal g 
-        JOIN user_goal ug ON g.goal_id = ug.goal_id
-        WHERE user_id = ?
+        FROM user_goal ug 
+        WHERE ug.user_id = ?
       )
-    `;
+    `;  
     connection.query(query, [userId], (err, results) => {
-      if (err) reject(err);
-      else resolve(results);  // Trả về kết quả từ DB
+      if (err) {
+        console.error('SQL Error:', err); // Log SQL error for debugging
+        return reject(err); // Return if there's an error
+      }
+      resolve(results[0]); // Resolve with the query results
     });
   });
 };
 
+const updateUserGoal = (goalId, goal) => {
+  return new Promise((resolve, reject) => {
+    let query = 'UPDATE goal SET ';
+    let params = [];
+    let setClause = []; // Mảng để lưu các điều kiện set
+
+    // Xây dựng câu truy vấn động
+    if (goal.goal_type) {
+      setClause.push('goal_type = ?');
+      params.push(goal.goal_type);
+    }
+    if (goal.weight_goal) {
+      setClause.push('weight_goal = ?');
+      params.push(goal.weight_goal);
+    }
+
+    // Nếu không có trường nào để cập nhật, chỉ cần resolve mà không thực hiện truy vấn
+    if (setClause.length === 0) {
+      return resolve({ message: 'Không có trường nào để cập nhật, không thực hiện thay đổi.' });
+    }
+
+    // Kết hợp các điều kiện set thành một chuỗi
+    query += setClause.join(', '); // Thêm điều kiện vào câu truy vấn
+
+    // Thêm điều kiện WHERE
+    query += ' WHERE goal_id = ?';
+    params.push(goalId);
+
+    // Thực hiện truy vấn
+    connection.query(query, params, (error, results) => {
+      if (error) {
+        console.error('Error updating user information:', error); // Log error
+        return reject(error); // Reject the promise on error
+      }
+      resolve(results); // Resolve với kết quả nếu thành công
+    });
+  });
+};
 
 module.exports = {
     newGoal,
@@ -76,5 +119,6 @@ module.exports = {
     linkUserGoal,
     updatedaytoGoal,
     getGoalinformation,
-    findGoalbyUser
+    findGoalbyUser,
+    updateUserGoal
 };
