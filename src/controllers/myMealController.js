@@ -5,11 +5,15 @@ const TDEEService = require('../services/TDEEService');
 const goalModel = require('../models/goalModel');
 //Thêm 1 món ăn vào meal
 const addFoodToMeal = async (req, res) => {
-  const { mealId, foodId, diaryId } = req.params;
-  const { portion, size } = req.body; 
+  const { mealId } = req.params;
+  const { userId, date, foodId, portion, size } = req.body; 
 
   try {
+    const diary = await mealModel.getDiary(date, userId);
+    const diaryId = diary.diary_id;
+    console.log({diaryId});
     const ListFoodId = await mealModel.findListFood(diaryId, mealId);
+    console.log({diaryId, ListFoodId});
     await mealModel.insertFoodInList(foodId, ListFoodId, portion, size);
     await mealModel.updateFoodNutrition(ListFoodId, foodId);
     await mealModel.updateListFoodNutrition(ListFoodId);
@@ -18,7 +22,7 @@ const addFoodToMeal = async (req, res) => {
     const updatedListFood = await mealModel.getListFoodByID(ListFoodId);
     
     return res.status(200).json({
-      message: 'Food added successfully',
+      message: 'Add successfully',
       updatedListFood: updatedListFood 
     });
     
@@ -30,14 +34,18 @@ const addFoodToMeal = async (req, res) => {
 
 // Xóa 1 món ăn khỏi meal
 const removeFoodFromMeal = async (req, res) => {
-  const { mealId, foodId, diaryId  } = req.params;
+  const { mealId, foodId  } = req.params;
+  const {userId, date} = req.body;
   try {
+    const diary = await mealModel.getDiary(date, userId);
+    const diaryId = diary.diary_id;
     const ListFoodId = await mealModel.findListFood(diaryId, mealId);
     await mealModel.increaseNutritionRemain(ListFoodId, foodId, diaryId);
     await mealModel.removeFoodFromList(foodId, ListFoodId);
     await mealModel.updateListFoodNutrition(ListFoodId);
     await mealModel.updateNutritionConsumed(diaryId);
-    return res.status(200).json({ message: 'Food removed successfully' });
+    const mealNutritions = await mealModel.getListFoodByID(ListFoodId);
+    return res.status(200).json({ message: 'Remove successfully', mealNutritions});
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -45,11 +53,12 @@ const removeFoodFromMeal = async (req, res) => {
 
 // Update size hay portion của món ăn
 const updatePortionSize = async (req, res) => {
-  const { mealId, foodId, diaryId } = req.params; 
-  const { portion, size } = req.body; 
+  const { mealId, foodId }= req.params; 
+  const { userId, date, portion, size } = req.body; 
 
   try {
-    
+    const diary = await mealModel.getDiary(date, userId);
+    const diaryId = diary.diary_id;
     const ListFoodId = await mealModel.findListFood(diaryId, mealId);
     const food = await mealModel.getFoodByID(foodId, ListFoodId);
     const calories_before = food.calories;
@@ -63,8 +72,8 @@ const updatePortionSize = async (req, res) => {
     const calories_after = foodtemp.calories;
     console.log(calories_after);
     await mealModel.decreaseNutritionRemain(ListFoodId, foodId, diaryId);
-
-    return res.status(200).json({ message: 'Update successfully' });
+    const foodNutrition = await mealModel.getFoodByID(foodId,ListFoodId);
+    return res.status(200).json({ message: 'Update successfully', foodNutrition });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -72,11 +81,15 @@ const updatePortionSize = async (req, res) => {
 
 // Lấy ra dinh dưỡng meal theo ID
 const getNutritionById = async (req, res) => {
-  const { diaryId, mealId } = req.params; 
-  const ListFoodId = await mealModel.findListFood(diaryId, mealId);
+  const { mealId } = req.params; 
+  
   try {
-    const nutritions = await mealModel.getListFoodByID(ListFoodId);
-    res.json(nutritions);
+    const {userId, date} = req.body;
+    const diary = await mealModel.getDiary(date, userId);
+    const diaryId = diary.diary_id;
+    const ListFoodId = await mealModel.findListFood(diaryId, mealId);
+    const mealNutritions = await mealModel.getListFoodByID(ListFoodId);
+    return res.status(200).json({mealNutritions});
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -84,11 +97,14 @@ const getNutritionById = async (req, res) => {
 
 //Lấy ra dinh dưỡng food 
 const getfoodInformation= async (req, res) => {
-  const { mealId, foodId, diaryId } = req.params;
+  const { mealId, foodId} = req.params;
+  const {userId, date} = req.body;
   try {
+    const diary = await mealModel.getDiary(date, userId);
+    const diaryId = diary.diary_id;
     const ListFoodId = await mealModel.findListFood(diaryId, mealId);
     const foodNutrition = await mealModel.getFoodByID(foodId,ListFoodId);
-    return res.status(200).json({ message: 'Get Successfully ', food: foodNutrition});
+    return res.status(200).json({foodNutrition});
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -96,8 +112,7 @@ const getfoodInformation= async (req, res) => {
 
 //Thêm mới 1 diary
 const addNewDiary= async (req, res) => {
-  const {userId}  = req.params; 
-  const {date} = req.body;
+  const {date, userId} = req.body;
   try {
     const newdiary = await mealModel.newDiary(date, userId);
     const user = await userModel.findUserByID(userId);
@@ -105,12 +120,23 @@ const addNewDiary= async (req, res) => {
     const goalId = goal.goal_id;
     console.log({diaryId:newdiary.diaryId, user:user, goal:goal, goalId: goalId});
     await TDEEService.updateUserTDEEAndDiary(userId, newdiary.diaryId, user, goal, goalId);
-    return res.status(200).json({ message: 'Add Successfully '});
+    const diary = await mealModel.getDiary(date,userId);
+    return res.status(200).json({ message: 'Add successfully ',diary});
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
 
+
+const getDiary = async (req, res) => {
+  const {date, userId} = req.body;
+  try {
+    const diary = await mealModel.getDiary(date, userId);
+    return res.status(200).json({diary});
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 module.exports = {
   addFoodToMeal,
   removeFoodFromMeal,
@@ -118,4 +144,5 @@ module.exports = {
   getNutritionById,
   getfoodInformation,
   addNewDiary,
+  getDiary
 };

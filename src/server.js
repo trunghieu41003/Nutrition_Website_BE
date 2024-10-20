@@ -15,7 +15,7 @@ app.use(express.json()); // Add middleware to parse JSON body
 
 // Đăng ký các routes RESTful cho API
 app.use('/api', userRoutes);
-app.use('/api/diaries', mealRoutes);
+app.use('/api', mealRoutes);
 app.use('/api', reportRoutes);
 // Start the server
 app.listen(port, () => {
