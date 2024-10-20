@@ -2,6 +2,7 @@
 const UserModel = require('../models/userModel');
 const goalModel = require('../models/goalModel');
 const mealModel = require('../models/myMealModel');
+const mealController = require('../controllers/myMealController');
 const TDEEService = require('../services/TDEEService');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -61,9 +62,12 @@ const logIn = async (req, res) => {
       
       // Tạo token hoặc session
       const token = jwt.sign({ userId: user.user_id, email: user.email }, 'secret_key', { expiresIn: '1h' });
-      const diary = await mealModel.getDiary(date, userId);
-      if(!diary) await mealModel.newDiary(date, userId);
-      
+      const diary = await mealModel.getDiary(date, user.user_id);
+      if(!diary) {
+        // Tạo một req.body mới để truyền cho addNewDiary
+        const reqForDiary = { body: { date: date, userId: user.user_id } };
+        await mealController.addNewDiary(reqForDiary, res);  // Gọi hàm addNewDiary
+      }
       res.status(200).json({ message: 'Đăng nhập thành công', token });
   } catch (error) {
       res.status(500).json({ message: 'Lỗi khi đăng nhập', error: error.message });
@@ -127,7 +131,7 @@ const updateUserInfo = async (req, res) => {
         }
       };
     }
-    return res.status(200).json({ message: 'Update successfully' });
+    return res.status(200).json({ message: 'Update successfully', user });
   } catch (error) {
     console.error('Error updating user info for user ID:', userId, error); // Log error details
     return res.status(500).json({ error: error.message });

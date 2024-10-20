@@ -232,7 +232,7 @@ const getListFoodByID = (ListFoodId) => {
 const findListFood = (diaryId, mealId) => {
   return new Promise((resolve, reject) => {
     const query = `
-    SELECT lf.ListFood_ID
+    SELECT *
     FROM Diary_ListFood dl
     JOIN ListFood lf ON dl.ListFood_ID = lf.ListFood_ID
     JOIN Meal m ON lf.meal_id = m.meal_id
@@ -327,7 +327,7 @@ const getDiary = (date, userId) => {
   `;
     connection.query(query, [date, userId], (err, results) => {
       if (err) reject(err);
-      else resolve(results);
+      else resolve(results[0]);
     });
   });
 };
@@ -382,6 +382,7 @@ WHERE diary_id = ?;
     });
   });
 };
+
 
 module.exports = {
   insertFoodInList,
