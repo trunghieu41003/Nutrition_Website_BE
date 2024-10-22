@@ -82,9 +82,8 @@ const updatePortionSize = async (req, res) => {
 // Lấy ra dinh dưỡng meal theo ID
 const getNutritionById = async (req, res) => {
   const { mealId } = req.params; 
-  
+  const { userId, date } = req.query;
   try {
-    const {userId, date} = req.body;
     const diary = await mealModel.getDiary(date, userId);
     const diaryId = diary.diary_id;
     const ListFoodId = await mealModel.findListFood(diaryId, mealId);
@@ -98,7 +97,7 @@ const getNutritionById = async (req, res) => {
 //Lấy ra dinh dưỡng food 
 const getfoodInformation= async (req, res) => {
   const { mealId, foodId} = req.params;
-  const {userId, date} = req.body;
+  const { userId, date } = req.query;
   try {
     const diary = await mealModel.getDiary(date, userId);
     const diaryId = diary.diary_id;
@@ -129,7 +128,7 @@ const addNewDiary= async (req, res) => {
 
 
 const getDiary = async (req, res) => {
-  const {date, userId} = req.body;
+  const { userId, date } = req.query;
   try {
     const diary = await mealModel.getDiary(date, userId);
     return res.status(200).json({diary});
