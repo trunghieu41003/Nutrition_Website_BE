@@ -33,11 +33,10 @@ const signUp = async (req, res) => {
       const newDiary = await mealModel.newDiary(date, newUser.userId);
       
       await TDEEService.updateUserTDEEAndDiary(newUser.userId,newDiary.diaryId, newUser, newGoal, newGoal.goalId);
-      
-      const calories = await UserModel.getCaloriesGoal(newUser.userId);
+      const user = await UserModel.findUserByID(newUser.userId);
       const daytoGoal = await goalModel.getGoalinformation(newGoal.goalId);
       // Trả về cả userId và goalId
-      res.status(201).json({ message: 'Đăng ký thành công', user: newUser, goal: newGoal, calories_goal:calories, goalafter:daytoGoal });
+      res.status(201).json({ message: 'Đăng ký thành công', user: user, goal:daytoGoal });
   } catch (error) {
       res.status(500).json({ message: 'Lỗi khi đăng ký', error: error.message });
   }

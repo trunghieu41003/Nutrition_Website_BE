@@ -17,11 +17,10 @@ const calculateTDEE = (user) => {
     // Hệ số hoạt động
     let activityFactor;
     switch (activity_level) {
-        case 'sedentary': activityFactor = 1.2; break;
-        case 'light': activityFactor = 1.375; break;
-        case 'moderate': activityFactor = 1.55; break;
+        case 'not very active': activityFactor = 1.375; break;
+        case 'moderately active': activityFactor = 1.55; break;
         case 'active': activityFactor = 1.725; break;
-        case 'very_active': activityFactor = 1.9; break;
+        case 'very active': activityFactor = 1.9; break;
         default: activityFactor = 1.2;
     }
 
@@ -76,7 +75,6 @@ const updateUserTDEEAndDiary = async (userId, diaryId, user, goal, goalId) => {
     // Tính toán TDEE và điều chỉnh theo mục tiêu
     const TDEE = calculateTDEE(user);
     const adjustedTDEE = adjustTDEEForGoal(TDEE, goal);
-    console.log ({AdjustTDEE: adjustedTDEE});
     // Tính toán macro dinh dưỡng dựa trên TDEE điều chỉnh
     const macros = calculateMacros(adjustedTDEE);
     await UserModel.updateCaloriesDaily(userId, adjustedTDEE);
