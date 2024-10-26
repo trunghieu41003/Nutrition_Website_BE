@@ -12,5 +12,4 @@ router.post('/users/logout', (req, res) => {
     // Để thông báo logout thành công
     res.status(200).json({ message: 'Logout thành công' });
 });
-router.put('/users/:userId', userController.updateUserInfo);
 module.exports = router;
