@@ -513,8 +513,77 @@ paths:
                   token:
                     type: string
                     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiSGlldXYzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzI5NTc5ODYyLCJleHAiOjE3Mjk1ODM0NjJ9.9zoy94W-DxCc7c0Q_gPZ5SteUbrIz2Oh1cf1wlTKNhw"
-
   /api/users/{user_id}:
+    get:
+      tags:
+        - User setting
+      summary: Get user information
+      description:  Get the information of a specific user.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: integer
+      responses:
+        200:
+          description: get successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Đăng ký thành công"
+                  user:
+                    type: object
+                    properties:
+                      user_id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: "Hieu"
+                      height:
+                        type: string
+                        example: "170.00"
+                      weight:
+                        type: string
+                        example: "150.00"
+                      birthday:
+                        type: string
+                        example: "2003-04-12"
+                      email:
+                        type: string
+                        example: "Hieuv3@example.com"
+                      password:
+                        type: string
+                        example: "$2b$10$UocTJzKxXiWWtF7EytyKX.4EmkiScJvbBLQSODDFegeghlzKkCLA2"
+                      calories_daily:
+                        type: string
+                        example: "3316.88"
+                      activity_level:
+                        type: string
+                        example: "moderate"
+                      gender:
+                        type: string
+                        example: "male"
+                  goal:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        goal_type:
+                          type: string
+                          example: "weight loss"
+                        weight_goal:
+                          type: number
+                          example: 100
+                        date:
+                          type: string
+                          example: "2026-09-22"
     put:
       tags:
         - User setting
