@@ -1,0 +1,790 @@
+openapi: 3.0.0
+info:
+  title: My Meal API
+  description: API Documentation for My Meal functionalities
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: My meal
+    description: Endpoints related to meal management
+  - name: User authentication
+    description: Endpoints related to user authentication
+  - name: User setting
+    description: Endpoints related to user setting
+  - name: Dashboard
+    description: Endpoints related to dashboard
+  - name: Report
+    description: Endpoints related to user report
+paths:
+  /api/meals/{meal_id}:
+    get:
+      tags:
+        - My meal
+      summary: Show 1 meal information
+      description: Retrieve nutritional information of a specific meal.
+      parameters:
+        - name: meal_id
+          in: path
+          required: true
+          description: ID of the meal
+          schema:
+            type: integer
+        - name: userId
+          in: query
+          required: true
+          description: ID of the user
+          schema:
+            type: integer
+        - name: date
+          in: query
+          required: true
+          description: Date of the meal
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: Successfully retrieved meal information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mealNutritions:
+                    type: object
+                    properties:
+                      ListFood_ID:
+                        type: integer
+                      meal_id:
+                        type: integer
+                      ListFood_fat:
+                        type: string
+                      ListFood_carbs:
+                        type: string
+                      ListFood_calories:
+                        type: string
+                      ListFood_protein:
+                        type: string
+
+  /api/meals/{meal_id}/foods/{food_id}:
+    get:
+      tags:
+        - My meal
+      summary: Show 1 food information
+      description: Retrieve nutritional information of a specific food in a meal.
+      parameters:
+        - name: meal_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: food_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: userId
+          in: query
+          required: true
+          description: ID of the user
+          schema:
+            type: integer
+        - name: date
+          in: query
+          required: true
+          description: Date of the meal
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: Successfully retrieved food information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  foodNutrition:
+                    type: object
+                    properties:
+                      food_id:
+                        type: integer
+                      ListFood_ID:
+                        type: integer
+                      portion:
+                        type: integer
+                      size:
+                        type: integer
+                      calories:
+                        type: string
+                      fat:
+                        type: string
+                      protein:
+                        type: string
+                      carbs:
+                        type: string
+
+    put:
+      tags:
+        - My meal
+      summary: Edit portion and size of food
+      description: Edit the portion and size of a food item in a meal.
+      parameters:
+        - name: meal_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: food_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                date:
+                  type: string
+                  format: date
+                portion:
+                  type: integer
+                size:
+                  type: integer
+      responses:
+        200:
+          description: Successfully updated food information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  foodNutrition:
+                    type: object
+                    properties:
+                      food_id:
+                        type: integer
+                      ListFood_ID:
+                        type: integer
+                      portion:
+                        type: integer
+                      size:
+                        type: integer
+                      calories:
+                        type: string
+                      fat:
+                        type: string
+                      protein:
+                        type: string
+                      carbs:
+                        type: string
+    delete:
+      tags:
+        - My meal
+      summary: Delete food from meal
+      description: Remove a food item from a meal.
+      parameters:
+        - name: meal_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: food_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                date:
+                  type: string
+                  format: date
+      responses:
+        200:
+          description: Successfully removed food from meal
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  mealNutritions:
+                    type: object
+                    properties:
+                      ListFood_ID:
+                        type: integer
+                      meal_id:
+                        type: integer
+                      ListFood_fat:
+                        type: string
+                      ListFood_carbs:
+                        type: string
+                      ListFood_calories:
+                        type: string
+                      ListFood_protein:
+                        type: string
+
+  /api/meals/{meal_id}/foods:
+    post:
+      tags:
+        - My meal
+      summary: Add new food to meal
+      description: Add a new food item to a specific meal.
+      parameters:
+        - name: meal_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                date:
+                  type: string
+                  format: date
+                foodId:
+                  type: integer
+                portion:
+                  type: integer
+                size:
+                  type: integer
+      responses:
+        200:
+          description: Successfully added food to meal
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  updatedListFood:
+                    type: object
+                    properties:
+                      ListFood_ID:
+                        type: integer
+                      meal_id:
+                        type: integer
+                      ListFood_fat:
+                        type: string
+                      ListFood_carbs:
+                        type: string
+                      ListFood_calories:
+                        type: string
+                      ListFood_protein:
+                        type: string
+
+  /api/diaries:
+    post:
+      tags:
+        - My meal
+      summary: Add new diary
+      description: Add a new diary entry for the day.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                date:
+                  type: string
+                  format: date
+      responses:
+        200:
+          description: Successfully added diary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  diary:
+                    type: object
+                    properties:
+                      diary_id:
+                        type: integer
+                      user_id:
+                        type: integer
+                      calories_consumed:
+                        type: string
+                        nullable: true
+                      calories_remaining:
+                        type: string
+                      protein_consumed:
+                        type: string
+                        nullable: true
+                      protein_remaining:
+                        type: string
+                      fat_consumed:
+                        type: string
+                        nullable: true
+                      fat_remaining:
+                        type: string
+                      carbs_consumed:
+                        type: string
+                        nullable: true
+                      carbs_remaining:
+                        type: string
+                      date:
+                        type: string
+                        format: date-time
+
+  /api/users/signup:
+    post:
+      tags:
+        - User authentication
+      summary: User Sign Up
+      description: This endpoint allows a new user to register.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of the user
+                  example: "Hieu"
+                email:
+                  type: string
+                  description: Email address of the user
+                  example: "Hieuv3@example.com"
+                password:
+                  type: string
+                  description: User password
+                  example: "123456"
+                height:
+                  type: number
+                  description: Height in centimeters
+                  example: 170
+                weight:
+                  type: number
+                  description: Weight in kilograms
+                  example: 150
+                birthday:
+                  type: string
+                  format: date
+                  description: User's birthday
+                  example: "2003-04-12"
+                gender:
+                  type: string
+                  description: User's gender
+                  example: "male"
+                activity_level:
+                  type: string
+                  description: User's activity level
+                  example: "moderate"
+                goal_type:
+                  type: string
+                  description: The user's fitness goal type
+                  example: "weight loss"
+                weight_goal:
+                  type: number
+                  description: The user's target weight
+                  example: 100
+                date:
+                  type: string
+                  format: date
+                  description: The registration date
+                  example: "2024-01-01"
+      responses:
+        200:
+          description: Successfully registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Đăng ký thành công"
+                  user:
+                    type: object
+                    properties:
+                      user_id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: "Hieu"
+                      height:
+                        type: string
+                        example: "170.00"
+                      weight:
+                        type: string
+                        example: "150.00"
+                      birthday:
+                        type: string
+                        example: "2003-04-12"
+                      email:
+                        type: string
+                        example: "Hieuv3@example.com"
+                      password:
+                        type: string
+                        example: "$2b$10$UocTJzKxXiWWtF7EytyKX.4EmkiScJvbBLQSODDFegeghlzKkCLA2"
+                      calories_daily:
+                        type: string
+                        example: "3316.88"
+                      activity_level:
+                        type: string
+                        example: "moderate"
+                      gender:
+                        type: string
+                        example: "male"
+                  goal:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        goal_type:
+                          type: string
+                          example: "weight loss"
+                        weight_goal:
+                          type: number
+                          example: 100
+                        date:
+                          type: string
+                          example: "2026-09-22"
+
+  /api/users/login:
+    post:
+      tags:
+        - User authentication
+      summary: User Login
+      description: This endpoint allows a user to log in.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: User's email address
+                  example: "Hieuv3@example.com"
+                password:
+                  type: string
+                  description: User's password
+                  example: "123456"
+                date:
+                  type: string
+                  format: date
+                  description: The login date
+                  example: "2024-01-01"
+      responses:
+        200:
+          description: Successfully logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Đăng nhập thành công"
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiSGlldXYzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzI5NTc5ODYyLCJleHAiOjE3Mjk1ODM0NjJ9.9zoy94W-DxCc7c0Q_gPZ5SteUbrIz2Oh1cf1wlTKNhw"
+  /api/users/{user_id}:
+    get:
+      tags:
+        - User setting
+      summary: Get user information
+      description:  Get the information of a specific user.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: integer
+      responses:
+        200:
+          description: get successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Đăng ký thành công"
+                  user:
+                    type: object
+                    properties:
+                      user_id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: "Hieu"
+                      height:
+                        type: string
+                        example: "170.00"
+                      weight:
+                        type: string
+                        example: "150.00"
+                      birthday:
+                        type: string
+                        example: "2003-04-12"
+                      email:
+                        type: string
+                        example: "Hieuv3@example.com"
+                      password:
+                        type: string
+                        example: "$2b$10$UocTJzKxXiWWtF7EytyKX.4EmkiScJvbBLQSODDFegeghlzKkCLA2"
+                      calories_daily:
+                        type: string
+                        example: "3316.88"
+                      activity_level:
+                        type: string
+                        example: "moderate"
+                      gender:
+                        type: string
+                        example: "male"
+                  goal:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        goal_type:
+                          type: string
+                          example: "weight loss"
+                        weight_goal:
+                          type: number
+                          example: 100
+                        date:
+                          type: string
+                          example: "2026-09-22"
+    put:
+      tags:
+        - User setting
+      summary: Update user information
+      description: Update the information of a specific user.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                height:
+                  type: number
+                weight:
+                  type: number
+                birthday:
+                  type: string
+                  format: date
+                gender:
+                  type: string
+                  enum: [male, female]
+                activity_level:
+                  type: string
+                  enum: [not very active, moderately active, active, very active]
+                goal_type:
+                  type: string
+                  enum: [weight loss, weight gain]
+                weight_goal:
+                  type: number
+      responses:
+        200:
+          description: Successfully updated user information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Update successfully"
+                  user:
+                    type: object
+                    properties:
+                      user_id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: "Hieu"
+                      height:
+                        type: string
+                        example: "170.00"
+                      weight:
+                        type: string
+                        example: "150.00"
+                      birthday:
+                        type: string
+                        format: date
+                        example: "2003-04-12"
+                      email:
+                        type: string
+                        example: "Hieuv1@example.com"
+                      password:
+                        type: string
+                        example: "$2b$10$Vk2..uGK7tmJvQmsRzAli.qiiIXMogpOIA.IyynCzr2EcvbKiWFia"
+                      calories_daily:
+                        type: string
+                        example: "3316.88"
+                      activity_level:
+                        type: string
+                        example: "moderately active"
+                      gender:
+                        type: string
+                        example: "male"
+
+  /api/diaries/meals:
+    get:
+      tags:
+        - Dashboard
+      summary: Get nutrition for a specific date
+      description: Retrieve nutrition information (calories, protein, fat, carbs) consumed and remaining for a user on a specific date.
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          description: ID of the user
+          schema:
+            type: integer
+        - name: date
+          in: query
+          required: true
+          description: Date of the meal
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: Successfully retrieved nutrition information for the given date
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  diary:
+                    type: object
+                    properties:
+                      diary_id:
+                        type: integer
+                        example: 1
+                      user_id:
+                        type: integer
+                        example: 1
+                      calories_consumed:
+                        type: string
+                        example: "288.89"
+                      calories_remaining:
+                        type: string
+                        example: "2166.11"
+                      protein_consumed:
+                        type: string
+                        example: "15.56"
+                      protein_remaining:
+                        type: string
+                        example: "168.57"
+                      fat_consumed:
+                        type: string
+                        example: "11.11"
+                      fat_remaining:
+                        type: string
+                        example: "70.72"
+                      carbs_consumed:
+                        type: string
+                        example: "37.78"
+                      carbs_remaining:
+                        type: string
+                        example: "207.72"
+                      date:
+                        type: string
+                        format: date-time
+                        example: "2023-12-31T17:00:00.000Z"
+
+  /api/users/{userId}/reports:
+    get:
+      tags:
+        - Report
+      summary: Track user nutrition over specific days
+      description: Retrieve a summary and detailed report of calories consumed by a user over a specific number of days.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: integer
+        - name: days
+          in: query
+          required: true
+          description: The number of days to track the nutrition report (7, 15, 30)
+          schema:
+            type: integer
+            enum: [7, 15, 30]
+      responses:
+        200:
+          description: Successfully retrieved the user's nutrition report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  report:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        Sum_calories_consumed:
+                          type: string
+                          description: Total calories consumed over the specified period
+                          example: "1850.00"
+                  reportDetails:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        calories_consumed:
+                          type: string
+                          description: Calories consumed on a specific date
+                          example: "1400.00"
+                        date:
+                          type: string
+                          format: date
+                          description: The date of the nutrition entry
+                          example: "2024-10-22"
+
+

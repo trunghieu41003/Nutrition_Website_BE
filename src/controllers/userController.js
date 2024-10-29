@@ -2,6 +2,7 @@
 const UserModel = require('../models/userModel');
 const goalModel = require('../models/goalModel');
 const mealModel = require('../models/myMealModel');
+const mealController = require('../controllers/myMealController');
 const TDEEService = require('../services/TDEEService');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -31,12 +32,11 @@ const signUp = async (req, res) => {
       await goalModel.linkUserGoal(newGoal.goalId, newUser.userId );
       const newDiary = await mealModel.newDiary(date, newUser.userId);
       
-      await TDEEService.updateUserTDEEAndDiary(newDiary.diaryId, newUser.userId, newUser, newGoal, newGoal.goalId);
-
-      const calories = await UserModel.getCaloriesGoal(newUser.userId);
+      await TDEEService.updateUserTDEEAndDiary(newUser.userId,newDiary.diaryId, newUser, newGoal, newGoal.goalId);
+      const user = await UserModel.findUserByID(newUser.userId);
       const daytoGoal = await goalModel.getGoalinformation(newGoal.goalId);
       // Trả về cả userId và goalId
-      res.status(201).json({ message: 'Đăng ký thành công', user: newUser, goal: newGoal, calories_goal:calories, goalafter:daytoGoal });
+      res.status(201).json({ message: 'Đăng ký thành công', user: user, goal:daytoGoal });
   } catch (error) {
       res.status(500).json({ message: 'Lỗi khi đăng ký', error: error.message });
   }
@@ -44,7 +44,7 @@ const signUp = async (req, res) => {
 
 // Xử lý đăng nhập
 const logIn = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, date } = req.body;
 
   try {
       // Kiểm tra xem email có tồn tại không
@@ -61,6 +61,12 @@ const logIn = async (req, res) => {
       
       // Tạo token hoặc session
       const token = jwt.sign({ userId: user.user_id, email: user.email }, 'secret_key', { expiresIn: '1h' });
+      const diary = await mealModel.getDiary(date, user.user_id);
+      if(!diary) {
+        // Tạo một req.body mới để truyền cho addNewDiary
+        const reqForDiary = { body: { date: date, userId: user.user_id } };
+        await mealController.addNewDiary(reqForDiary, res);  // Gọi hàm addNewDiary
+      }
       res.status(200).json({ message: 'Đăng nhập thành công', token });
   } catch (error) {
       res.status(500).json({ message: 'Lỗi khi đăng nhập', error: error.message });
@@ -78,9 +84,8 @@ const logout = (req, res) => {
   });
 };
 
-
 module.exports = {
   signUp,
   logIn,
-  logout
+  logout,
 };
