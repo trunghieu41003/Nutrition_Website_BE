@@ -10,7 +10,11 @@ const authenticateToken = (req, res, next) => {
   jwt.verify(token, 'secret_key', (err, user) => {
     if (err) return res.status(403).json({ message: 'Invalid or expired token' });
 
-    req.user = user; // Lưu thông tin user vào request object
+    if (req.method === 'GET') {
+      req.query.userId = user.userId;
+    } else {
+      req.body.userId = user.userId;
+    }
     next(); // Cho phép tiếp tục xử lý controller tiếp theo
   });
 };

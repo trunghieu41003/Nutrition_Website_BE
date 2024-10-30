@@ -4,19 +4,19 @@ const connection = require('../config/database');
 // Tìm người dùng theo email
 const findUserByEmail = (email) => {
   return new Promise((resolve, reject) => {
-      connection.query('SELECT * FROM User WHERE email = ?', [email], (err, results) => {
-          if (err) {
-              return reject(err);
-          }
-          resolve(results[0]); // Nếu không có lỗi, trả về kết quả tìm thấy
-      });
+    connection.query('SELECT * FROM User WHERE email = ?', [email], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results[0]); // Nếu không có lỗi, trả về kết quả tìm thấy
+    });
   });
 };
 
 const findUserByID = (userId) => {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT *, DATE_FORMAT(birthday, "%Y-%m-%d") AS birthday FROM User WHERE user_id = ?', 
-      [userId], 
+    connection.query('SELECT *, DATE_FORMAT(birthday, "%Y-%m-%d") AS birthday FROM User WHERE user_id = ?',
+      [userId],
       (err, results) => {
         if (err) {
           return reject(err);
@@ -31,17 +31,17 @@ const findUserByID = (userId) => {
 // Tạo người dùng mới
 const createUser = (userData) => {
   return new Promise((resolve, reject) => {
-      const { name, email, password, height, weight, birthday, gender, activity_level } = userData;
-      connection.query(
-          'INSERT INTO User (name, email, password, height, weight, birthday, gender, activity_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-          [name, email, password, height, weight, birthday, gender, activity_level],
-          (err, results) => {
-              if (err) {
-                  return reject(err);
-              }
-              resolve({ userId: results.insertId, ...userData }); // Trả về dữ liệu người dùng mới
-          }
-      );
+    const { name, email, password, height, weight, birthday, gender, activity_level } = userData;
+    connection.query(
+      'INSERT INTO User (name, email, password, height, weight, birthday, gender, activity_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [name, email, password, height, weight, birthday, gender, activity_level],
+      (err, results) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve({ userId: results.insertId, ...userData }); // Trả về dữ liệu người dùng mới
+      }
+    );
   });
 };
 
@@ -56,19 +56,6 @@ const updateUser = (id, userData) => {
     });
   });
 };
-
-
-const getCaloriesGoal = (userId) => {
-  return new Promise((resolve, reject) => {
-    const getQuery = 'SELECT calories_remaining FROM diary WHERE user_id = ?';
-    connection.query(getQuery, [userId], (err, results) => {
-      if (err) reject(err);
-      else if (results.length === 0) resolve(null); // Handle no results
-      else resolve(results[0]); // Return the first result
-    });
-  });
-};
-
 
 const updateUserInformation = (userId, user) => {
   return new Promise((resolve, reject) => {
@@ -125,20 +112,6 @@ const updateUserInformation = (userId, user) => {
   });
 };
 
-
-const getUserDiary = (userId) => {
-  return new Promise((resolve, reject) => {
-    // Câu truy vấn SQL với điều kiện ngày >= ngày hiện tại
-    const getQuery = 'SELECT diary_id FROM diary WHERE user_id = ? AND date >= CURDATE()';
-    // Thực hiện truy vấn
-    connection.query(getQuery, [userId], (err, results) => {
-      if (err) reject(err);
-      else resolve(results);
-    });
-  });
-};
-
-
 const updateCaloriesDaily = (userId, CaloriesDaily) => {
   return new Promise((resolve, reject) => {
     const getQuery = 'Update user SET calories_daily = ? where user_id = ?';
@@ -153,9 +126,9 @@ module.exports = {
   updateUser,
   findUserByEmail,
   createUser,
-  getCaloriesGoal,
+
   findUserByID,
   updateUserInformation,
-  getUserDiary,
+
   updateCaloriesDaily
 };
