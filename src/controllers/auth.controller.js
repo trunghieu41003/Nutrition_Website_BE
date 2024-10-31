@@ -61,13 +61,13 @@ const logIn = async (req, res) => {
     }
     // Tạo token hoặc session
     const token = jwt.sign({ userId: user.user_id, email: user.email }, 'secret_key', { expiresIn: '1h' });
-    const curdate = new Date().toISOString().slice(0, 10)
-    const diary = await diarymodel.getDiary(curdate, user.user_id);
-    if (!diary) {
+    //const curdate = new Date().toISOString().slice(0, 10)
+    //const diary = await diarymodel.getDiary(curdate, user.user_id);
+    /*if (!diary) {
       // Tạo một req.body mới để truyền cho addNewDiary
       const reqForDiary = { body: { date: curdate, userId: user.user_id } };
       await mymealcontroller.addNewDiary(reqForDiary, res);  // Gọi hàm addNewDiary
-    }
+    }*/
     res.status(200).json({ message: 'Đăng nhập thành công', token });
   } catch (error) {
     res.status(500).json({ message: 'Lỗi khi đăng nhập', error: error.message });

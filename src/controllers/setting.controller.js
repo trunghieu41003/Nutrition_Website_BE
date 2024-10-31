@@ -6,10 +6,8 @@ const listfoodmodel = require('../models/listfood.model')
 const TDEEService = require('../services/TDEEService');
 
 const updateUserInfo = async (req, res) => {
-  const { userId } = req.params;
+  const { userId } = req.body;
   const userData = req.body;
-  const goalData = req.body;
-
   try {
     console.log('Received request to update user info for user ID:', userId); // Log initial request
     const goal = await goalmodel.findGoalbyUser(userId);
@@ -20,7 +18,7 @@ const updateUserInfo = async (req, res) => {
     await usermodel.updateUserInformation(userId, userData);
     console.log('Updated user information for user ID:', userId); // Log successful user info update
     // Update user goals
-    await goalmodel.updateUserGoal(goalId, goalData);
+    await goalmodel.updateUserGoal(goalId, userData);
     console.log('Updated user goals for goal IDs:', goalId); // Log successful goal update
     // Get user diary
     const diary = await diarymodel.getUserDiary(userId);
@@ -58,7 +56,7 @@ const updateUserInfo = async (req, res) => {
   }
 };
 const getUserInfo = async (req, res) => {
-  const { userId } = req.params;
+  const { userId } = req.query;
   try {
     const user = await usermodel.findUserByID(userId);
     const goal = await goalmodel.findGoalbyUser(userId);

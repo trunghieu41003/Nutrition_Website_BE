@@ -1,7 +1,7 @@
 const reportmodel = require('../models/diary.model');
 
 const CaloriesReport = async (req, res) => {
-  const { userId } = req.params;
+  const { userId } = req.query;
   const { days } = req.query;
   try {
     const report = await reportmodel.getReport(userId, days);
