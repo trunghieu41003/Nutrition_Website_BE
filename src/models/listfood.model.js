@@ -78,13 +78,14 @@ const updateListFoodNutrition = (ListFoodId) => {
 const updateFoodNutrition = (ListFoodId, foodId) => {
   const updateQuery = `
     UPDATE ListFood_food lff
-    JOIN Food f ON lff.food_id = f.food_id
-    SET 
-      lff.calories = COALESCE(((f.calories * lff.size) / f.serving_size * lff.portion), 0),
-      lff.carbs = COALESCE(((f.carbs * lff.size) / f.serving_size * lff.portion), 0),
-      lff.protein = COALESCE(((f.protein * lff.size) / f.serving_size * lff.portion), 0),
-      lff.fat = COALESCE(((f.fat * lff.size) / f.serving_size * lff.portion), 0)
-    WHERE lff.ListFood_ID = ? AND lff.food_id = ?;
+JOIN Food f ON lff.food_id = f.food_id
+SET 
+  lff.calories = COALESCE(((f.calories * lff.size / f.serving_size) * lff.portion), 0),
+  lff.carbs = COALESCE(((f.carbs * lff.size / f.serving_size) * lff.portion), 0),
+  lff.protein = COALESCE(((f.protein * lff.size) / f.serving_size) * lff.portion, 0),
+  lff.fat = COALESCE(((f.fat * lff.size) / f.serving_size) * lff.portion, 0)
+WHERE lff.ListFood_ID = ? AND lff.food_id = ?;
+
   `;
   return new Promise((resolve, reject) => {
     connection.query(updateQuery, [ListFoodId, foodId], (err, results) => {
@@ -98,18 +99,22 @@ const updateFoodNutrition = (ListFoodId, foodId) => {
 };
 
 // Lấy dinh dưỡng của một danh sách theo ID
-const getListFoodByID = (ListFoodId) => {
+const getAllFoodByDate = (diaryId) => {
   return new Promise((resolve, reject) => {
     const query = `
-      SELECT *
-      FROM ListFood
-      WHERE ListFood_id = ?;
+      SELECT lff .*, f.name_food, m.name, m.meal_id
+        FROM ListFood_food lff Join Food f on lff.food_id = f.food_id
+        JOIN ListFood lf ON lff.ListFood_id = lf.ListFood_id
+        JOIN Meal m ON m.meal_id = lf.meal_id
+        JOIN diary_listfood dl ON dl.ListFood_ID = lf.ListFood_ID
+        JOIN diary d ON d.diary_id=dl.diary_id
+        WHERE d.diary_id= ?
     `;
-    connection.query(query, [ListFoodId], (err, results) => {
+    connection.query(query, [diaryId], (err, results) => {
       if (err) {
         reject(err);
       } else {
-        resolve(results[0]); // Trả về hàng đầu tiên chứa dinh dưỡng của bữa ăn
+        resolve(results); // Trả về hàng đầu tiên chứa dinh dưỡng của bữa ăn
       }
     });
   });
@@ -128,7 +133,7 @@ const findListFood = (diaryId, mealId) => {
       if (err) {
         reject(err);
       } else {
-        resolve(results[0].ListFood_ID);
+        resolve(results[0]);
       }
     });
   });
@@ -138,9 +143,13 @@ const findListFood = (diaryId, mealId) => {
 const getFoodByID = (foodId, ListFoodId) => {
   return new Promise((resolve, reject) => {
     const query = `
-        SELECT *
-        FROM ListFood_food 
-        WHERE ListFood_id = ? AND food_id = ?
+        SELECT lff.*, m.name, f.name_food, m.meal_id
+        FROM ListFood_food lff
+        JOIN Food f ON lff.food_id = f.food_id
+        JOIN ListFood lf ON lf.ListFood_ID = lff.ListFood_ID
+        JOIN Meal m ON m.meal_id = lf.meal_id
+        WHERE lff.ListFood_ID = ? AND lff.food_id = ?;
+
     `;
     connection.query(query, [ListFoodId, foodId], (err, results) => {
       if (err) {
@@ -189,7 +198,7 @@ module.exports = {
   removeFoodFromList,
   updateListFoodNutrition,
   updateFoodNutrition,
-  getListFoodByID,
+  getAllFoodByDate,
   findListFood,
   getFoodByID,
   UpdatePortionSize,

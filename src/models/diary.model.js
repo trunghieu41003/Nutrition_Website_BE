@@ -140,8 +140,7 @@ const saveDiaryEntry = (diaryId, adjustedTDEE, macros) => {
       calories_remaining = ?, 
       protein_remaining = ?,
       carbs_remaining = ?,
-      fat_remaining = ?,
-      date = CURDATE()
+      fat_remaining = ?
       where diary_id = ?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
   `;
     connection.query(query, [adjustedTDEE, protein, carbs, fat, diaryId,], (err, results) => {

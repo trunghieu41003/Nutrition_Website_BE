@@ -15,6 +15,7 @@ const authroutes = require('./routes/auth.routes');
 const mymealroutes = require('./routes/mymeal.routes');
 const reportroutes = require('./routes/report.routes');
 const settingroutes = require('./routes/setting.routes');
+const dashboardroutes = require('./routes/dashboard.routes');
 const authenticateToken = require('./middleware/jwt');
 require('dotenv').config();
 
@@ -27,9 +28,10 @@ app.use('/api', authroutes);
 app.use('/api/auth', authenticateToken, mymealroutes);
 app.use('/api/auth', authenticateToken, reportroutes);
 app.use('/api/auth', authenticateToken, settingroutes);
+app.use('/api/auth', authenticateToken, dashboardroutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Example app listening at http://${hostname}:${port}`);
+    console.log(`app listening at http://${hostname}:${port}`);
 });

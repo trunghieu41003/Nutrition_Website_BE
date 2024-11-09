@@ -11,15 +11,13 @@ router.delete('/meals/:mealId/foods/:foodId', mealController.removeFoodFromMeal)
 router.put('/meals/:mealId/foods/:foodId', mealController.updatePortionSize);
 
 // Lấy tổng dinh dưỡng của danh sách trong 1 bữa ăn
-router.get('/meals/:mealId', mealController.getNutritionById);
+router.get('/meals', mealController.getNutritionByDate);
 
 // Lấy dinh dưỡng chi tiết của 1 món
 router.get('/meals/:mealId/foods/:foodId', mealController.getfoodInformation);
 
-router.get('/diaries/meals', mealController.getDiary);
-
 router.post('/diaries', mealController.addNewDiary);
 
-router.get('/foods', mealController.getAllFood);
+router.get('/foods/:foodId', mealController.getAllFood);
 module.exports = router;
 
