@@ -34,6 +34,8 @@ const signUp = async (req, res) => {
     const newDiary = await diarymodel.newDiary(date, newUser.userId);
 
     await TDEEService.updateUserTDEEAndDiary(newUser.userId, newDiary.diaryId, newUser, newGoal, newGoal.goalId);
+
+    console.log({ newUser, newGoal });
     const user = await usermodel.findUserByID(newUser.userId);
     const daytoGoal = await goalmodel.getGoalinformation(newGoal.goalId);
     // Trả về cả userId và goalId
@@ -51,26 +53,20 @@ const logIn = async (req, res) => {
     // Kiểm tra xem email có tồn tại không
     const user = await usermodel.findUserByEmail(email);
     if (!user) {
-      return res.status(404).json({ message: 'Email không tồn tại' });
+      return res.status(404).json({ message: 'Email does not exist' });
     }
 
     // Kiểm tra mật khẩu
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(401).json({ message: 'Mật khẩu không đúng' });
+      return res.status(401).json({ message: 'Password is incorrect' });
     }
     // Tạo token hoặc session
     const token = jwt.sign({ userId: user.user_id, email: user.email }, 'secret_key', { expiresIn: '1h' });
-    //const curdate = new Date().toISOString().slice(0, 10)
-    //const diary = await diarymodel.getDiary(curdate, user.user_id);
-    /*if (!diary) {
-      // Tạo một req.body mới để truyền cho addNewDiary
-      const reqForDiary = { body: { date: curdate, userId: user.user_id } };
-      await mymealcontroller.addNewDiary(reqForDiary, res);  // Gọi hàm addNewDiary
-    }*/
-    res.status(200).json({ message: 'Đăng nhập thành công', token });
+
+    res.status(200).json({ message: 'Log in successfully', token });
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi khi đăng nhập', error: error.message });
+    res.status(500).json({ message: 'Error while logging in', error: error.message });
   }
 };
 
@@ -79,14 +75,107 @@ const logout = (req, res) => {
   // Xóa session
   req.session.destroy((err) => {
     if (err) {
-      return res.status(500).json({ message: 'Lỗi khi đăng xuất' });
+      return res.status(500).json({ message: 'Error while logging out' });
     }
-    res.status(200).json({ message: 'Đăng xuất thành công' });
+    res.status(200).json({ message: 'Signed out successfully' });
   });
 };
+
+
+
+const nodemailer = require('nodemailer');
+const userModel = require('../models/user.model'); // Thay đổi đường dẫn nếu cần thiết
+
+// Hàm gửi email reset mật khẩu
+const sendResetPasswordEmail = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // Check if the user exists
+    const user = await userModel.findUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: 'Không tìm thấy người dùng với email này' });
+    }
+
+    // Generate a token with email and expiration time (e.g., 1 hour)
+    const token = jwt.sign({ email }, 'your_secret_key', { expiresIn: '1h' });
+
+    // Configure Nodemailer
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    // Reset password link with token as a query parameter
+    const resetLink = `http://localhost:3001/resetpw?token=${token}`;
+
+    // Configure the email
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Yêu cầu đặt lại mật khẩu',
+      html: `<p>Xin chào,</p>
+             <p>Bạn đã yêu cầu đặt lại mật khẩu. Hãy nhấn vào liên kết dưới đây để đặt lại mật khẩu của bạn:</p>
+             <a href="${resetLink}">${resetLink}</a>
+             <p>Nếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.</p>`,
+    };
+
+    console.log("Sending reset password email to:", mailOptions.to); // Log email
+
+    // Send the email
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'Email reset mật khẩu đã được gửi thành công!' });
+  } catch (error) {
+    console.error('Lỗi khi gửi email:', error);
+    res.status(500).json({ message: 'Đã xảy ra lỗi khi gửi email' });
+  }
+};
+
+// Function to handle password reset using the token
+const resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    // Verify the token and retrieve the email
+    const decoded = jwt.verify(token, 'your_secret_key');
+    const email = decoded.email;
+
+    // Find user by email
+    const user = await userModel.findUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password in the database
+    await userModel.updateUser(user.user_id, { password: hashedPassword });
+
+    res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error) {
+    console.error('Error during password reset:', error);
+
+    // Check for token expiration
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Your session expired. Please request a new password reset.' });
+    }
+
+    res.status(500).json({ message: 'Error during password reset', error: error.message });
+  }
+};
+
 
 module.exports = {
   signUp,
   logIn,
   logout,
+  sendResetPasswordEmail,
+  resetPassword, // Add this line
 };
+
+

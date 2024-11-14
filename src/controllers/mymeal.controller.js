@@ -6,6 +6,7 @@ const listfoodmodel = require('../models/listfood.model');
 const TDEEService = require('../services/TDEEService');
 const goalmodel = require('../models/goal.model');
 
+
 //Thêm 1 món ăn vào meal
 const addFoodToMeal = async (req, res) => {
   const { mealId } = req.params;
@@ -85,7 +86,7 @@ const updatePortionSize = async (req, res) => {
   }
 };
 
-// Lấy ra dinh dưỡng meal theo ID
+// Lấy ra dinh dưỡng meal theo Date
 const getNutritionByDate = async (req, res) => {
   const { userId, date } = req.query;
   try {
@@ -153,5 +154,6 @@ module.exports = {
   getNutritionByDate,
   getfoodInformation,
   addNewDiary,
+
   getAllFood
 };

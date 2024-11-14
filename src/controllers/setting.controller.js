@@ -8,6 +8,8 @@ const TDEEService = require('../services/TDEEService');
 const updateUserInfo = async (req, res) => {
   const { userId } = req.body;
   const userData = req.body;
+  const goalData = req.body;
+
   try {
     console.log('Received request to update user info for user ID:', userId); // Log initial request
     const goal = await goalmodel.findGoalbyUser(userId);
@@ -18,7 +20,7 @@ const updateUserInfo = async (req, res) => {
     await usermodel.updateUserInformation(userId, userData);
     console.log('Updated user information for user ID:', userId); // Log successful user info update
     // Update user goals
-    await goalmodel.updateUserGoal(goalId, userData);
+    await goalmodel.updateUserGoal(goalId, goalData);
     console.log('Updated user goals for goal IDs:', goalId); // Log successful goal update
     // Get user diary
     const diary = await diarymodel.getUserDiary(userId);

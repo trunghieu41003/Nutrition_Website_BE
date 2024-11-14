@@ -121,12 +121,29 @@ const updateCaloriesDaily = (userId, CaloriesDaily) => {
     });
   });
 };
+
+
+const updateUserPassword = (email, newPassword) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      'UPDATE User SET password = ? WHERE email = ?',
+      [newPassword, email],
+      (err, results) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(results); // Return the result of the update
+      }
+    );
+  });
+};
+
 module.exports = {
   createUser,
   updateUser,
   findUserByEmail,
   createUser,
-
+updateUserPassword,
   findUserByID,
   updateUserInformation,
 

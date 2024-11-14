@@ -14,4 +14,4 @@ const getAllFood = (foodId) => {
 
 module.exports = {
   getAllFood
-}  
+} 

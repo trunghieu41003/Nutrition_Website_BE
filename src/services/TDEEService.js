@@ -21,7 +21,7 @@ const calculateTDEE = (user) => {
         case 'moderately active': activityFactor = 1.55; break;
         case 'active': activityFactor = 1.725; break;
         case 'very active': activityFactor = 1.9; break;
-        default: activityFactor = 1.2;
+        //default: activityFactor = 1.2;
     }
 
     // TDEE = BMR * activityFactor
