@@ -4,7 +4,7 @@ const connection = require('../config/database');
 // Tìm người dùng theo email
 const findUserByEmail = (email) => {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT * FROM User WHERE email = ?', [email], (err, results) => {
+    connection.query('SELECT * FROM user WHERE email = ?', [email], (err, results) => {
       if (err) {
         return reject(err);
       }
@@ -15,7 +15,7 @@ const findUserByEmail = (email) => {
 
 const findUserByID = (userId) => {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT *, DATE_FORMAT(birthday, "%Y-%m-%d") AS birthday FROM User WHERE user_id = ?',
+    connection.query('SELECT *, DATE_FORMAT(birthday, "%Y-%m-%d") AS birthday FROM user WHERE user_id = ?',
       [userId],
       (err, results) => {
         if (err) {
@@ -33,7 +33,7 @@ const createUser = (userData) => {
   return new Promise((resolve, reject) => {
     const { name, email, password, height, weight, birthday, gender, activity_level } = userData;
     connection.query(
-      'INSERT INTO User (name, email, password, height, weight, birthday, gender, activity_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO user (name, email, password, height, weight, birthday, gender, activity_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [name, email, password, height, weight, birthday, gender, activity_level],
       (err, results) => {
         if (err) {
@@ -143,7 +143,7 @@ module.exports = {
   updateUser,
   findUserByEmail,
   createUser,
-updateUserPassword,
+  updateUserPassword,
   findUserByID,
   updateUserInformation,
 

@@ -28,25 +28,25 @@ const updateNutritionConsumed = (diaryId) => {
       calories_consumed = (
         SELECT 
           COALESCE(SUM(ListFood_calories), 0)
-        FROM diary_listFood dl Join ListFood lf on dl.ListFood_ID = lf.ListFood_ID
+        FROM diary_listfood dl Join listfood lf on dl.ListFood_ID = lf.ListFood_ID
         WHERE diary_id = ?
       ),
       carbs_consumed = (
         SELECT 
           COALESCE(SUM(ListFood_carbs), 0)
-        FROM diary_listFood dl Join ListFood lf on dl.ListFood_ID = lf.ListFood_ID
+        FROM diary_listfood dl Join listfood lf on dl.ListFood_ID = lf.ListFood_ID
         WHERE diary_id = ?
       ),
       protein_consumed = (
         SELECT 
           COALESCE(SUM(ListFood_protein), 0)
-        FROM diary_listFood dl Join ListFood lf on dl.ListFood_ID = lf.ListFood_ID
+        FROM diary_listfood dl Join listfood lf on dl.ListFood_ID = lf.ListFood_ID
         WHERE diary_id = ?
       ),
       fat_consumed = (
         SELECT 
           COALESCE(SUM(ListFood_fat), 0)
-        FROM diary_listFood dl Join ListFood lf on dl.ListFood_ID = lf.ListFood_ID
+        FROM diary_listfood dl Join listfood lf on dl.ListFood_ID = lf.ListFood_ID
         WHERE diary_id = ?
       )
     WHERE diary_id = ?;
@@ -66,16 +66,16 @@ const decreaseNutritionRemain = (ListFoodId, foodId, diaryId) => {
     UPDATE diary 
 SET 
   calories_remaining = COALESCE(calories_remaining, 0) - COALESCE(
-    (SELECT calories FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+    (SELECT calories FROM listfood_food WHERE ListFood_id = ? AND food_id = ?), 0
   ),
   carbs_remaining = COALESCE(carbs_remaining, 0) - COALESCE(
-    (SELECT carbs FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+    (SELECT carbs FROM listfood_food WHERE ListFood_id = ? AND food_id = ?), 0
   ), 
   protein_remaining = COALESCE(protein_remaining, 0) - COALESCE(
-    (SELECT protein FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+    (SELECT protein FROM listfood_food WHERE ListFood_id = ? AND food_id = ?), 0
   ), 
   fat_remaining = COALESCE(fat_remaining, 0) - COALESCE(
-    (SELECT fat FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+    (SELECT fat FROM listfood_food WHERE ListFood_id = ? AND food_id = ?), 0
   )
 WHERE diary_id = ?;
 
@@ -101,16 +101,16 @@ const increaseNutritionRemain = (ListFoodId, foodId, diaryId) => {
     UPDATE diary 
 SET 
   calories_remaining = COALESCE(calories_remaining, 0) + COALESCE(
-    (SELECT calories FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+    (SELECT calories FROM listfood_food WHERE ListFood_id = ? AND food_id = ?), 0
   ),
   carbs_remaining = COALESCE(carbs_remaining, 0) + COALESCE(
-    (SELECT carbs FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+    (SELECT carbs FROM listfood_food WHERE ListFood_id = ? AND food_id = ?), 0
   ), 
   protein_remaining = COALESCE(protein_remaining, 0) + COALESCE(
-    (SELECT protein FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+    (SELECT protein FROM listfood_food WHERE ListFood_id = ? AND food_id = ?), 0
   ), 
   fat_remaining = COALESCE(fat_remaining, 0) + COALESCE(
-    (SELECT fat FROM ListFood_food WHERE ListFood_id = ? AND food_id = ?), 0
+    (SELECT fat FROM listfood_food WHERE ListFood_id = ? AND food_id = ?), 0
   )
 WHERE diary_id = ?;
 
@@ -153,7 +153,7 @@ const saveDiaryEntry = (diaryId, adjustedTDEE, macros) => {
 const newDiary = (date, userId) => {
   return new Promise((resolve, reject) => {
     const query = `
-      INSERT INTO Diary (date, user_id)
+      INSERT INTO diary (date, user_id)
       VALUES (?, ?)
   `;
     connection.query(query, [date, userId], (err, results) => {
@@ -209,16 +209,16 @@ const updateNutritionRemain = (diaryId) => {
     UPDATE diary 
 SET 
   calories_remaining = COALESCE(calories_remaining, 0) - COALESCE(
-    (SELECT Sum(ListFood_calories) FROM ListFood WHERE diary_id = ?), 0
+    (SELECT Sum(ListFood_calories) FROM listfood WHERE diary_id = ?), 0
   ),
   carbs_remaining = COALESCE(carbs_remaining, 0) - COALESCE(
-    (SELECT Sum(ListFood_carbs) FROM ListFood WHERE diary_id = ?), 0
+    (SELECT Sum(ListFood_carbs) FROM listfood WHERE diary_id = ?), 0
   ), 
   protein_remaining = COALESCE(protein_remaining, 0) - COALESCE(
-    (SELECT Sum(ListFood_protein) FROM ListFood WHERE diary_id = ?), 0
+    (SELECT Sum(ListFood_protein) FROM listfood WHERE diary_id = ?), 0
   ), 
   fat_remaining = COALESCE(fat_remaining, 0) + COALESCE(
-    (SELECT Sum(ListFood_fat) FROM ListFood WHERE diary_id = ?), 0
+    (SELECT Sum(ListFood_fat) FROM listfood WHERE diary_id = ?), 0
   )
 WHERE diary_id = ?;
 
@@ -239,7 +239,21 @@ WHERE diary_id = ?;
     });
   });
 };
+
+
+const addListFoodtoDiary = (diaryId, ListFoodId) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      Insert into diary_listfood (diary_id, ListFood_ID) values (?, ?);
+  `;
+    connection.query(query, [diaryId, ListFoodId], (err, results) => {
+      if (err) reject(err);
+      else resolve(results);
+    });
+  });
+};
 module.exports = {
+  addListFoodtoDiary,
   getUserDiary,
   getCaloriesGoal,
   increaseNutritionRemain,
