@@ -19,5 +19,6 @@ router.get('/meals/:mealId/foods/:foodId', mealController.getfoodInformation);
 router.post('/diaries', mealController.addNewDiary);
 
 router.get('/foods', mealController.getAllFood);
+
 module.exports = router;
 

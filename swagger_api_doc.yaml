@@ -14,22 +14,15 @@ tags:
     description: Endpoints related to user setting
   - name: Dashboard
     description: Endpoints related to dashboard
-  - name: Report
-    description: Endpoints related to user report
 paths:
-  /api/meals/{meal_id}:
+  # My meal API
+  /api/auth/meals:
     get:
       tags:
         - My meal
-      summary: Show 1 meal information
-      description: Retrieve nutritional information of a specific meal.
+      summary: Retrieve meal nutrition information by date
+      description: Get nutritional information for a user's meals on a specific date.
       parameters:
-        - name: meal_id
-          in: path
-          required: true
-          description: ID of the meal
-          schema:
-            type: integer
         - name: userId
           in: query
           required: true
@@ -39,40 +32,42 @@ paths:
         - name: date
           in: query
           required: true
-          description: Date of the meal
+          description: Date to retrieve meal information
           schema:
             type: string
             format: date
       responses:
         200:
-          description: Successfully retrieved meal information
+          description: Successfully retrieved meal nutrition information
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  mealNutritions:
-                    type: object
-                    properties:
-                      ListFood_ID:
-                        type: integer
-                      meal_id:
-                        type: integer
-                      ListFood_fat:
-                        type: string
-                      ListFood_carbs:
-                        type: string
-                      ListFood_calories:
-                        type: string
-                      ListFood_protein:
-                        type: string
+                  food:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        food_id:
+                          type: integer
+                        name:
+                          type: string
+                        calories:
+                          type: string
+                        protein:
+                          type: string
+                        fat:
+                          type: string
+                        carbs:
+                          type: string
 
   /api/meals/{meal_id}/foods/{food_id}:
     get:
       tags:
         - My meal
-      summary: Show 1 food information
-      description: Retrieve nutritional information of a specific food in a meal.
+      summary: Retrieve food nutrition information in a meal
+      description: Retrieve detailed nutritional information of a specific food item in a meal.
       parameters:
         - name: meal_id
           in: path
@@ -93,7 +88,7 @@ paths:
         - name: date
           in: query
           required: true
-          description: Date of the meal
+          description: Date to retrieve the food information
           schema:
             type: string
             format: date
@@ -110,17 +105,11 @@ paths:
                     properties:
                       food_id:
                         type: integer
-                      ListFood_ID:
-                        type: integer
-                      portion:
-                        type: integer
-                      size:
-                        type: integer
                       calories:
                         type: string
-                      fat:
-                        type: string
                       protein:
+                        type: string
+                      fat:
                         type: string
                       carbs:
                         type: string
@@ -128,8 +117,8 @@ paths:
     put:
       tags:
         - My meal
-      summary: Edit portion and size of food
-      description: Edit the portion and size of a food item in a meal.
+      summary: Update portion and size of a food item
+      description: Update the portion and size of a food item in a specific meal.
       parameters:
         - name: meal_id
           in: path
@@ -172,25 +161,20 @@ paths:
                     properties:
                       food_id:
                         type: integer
-                      ListFood_ID:
-                        type: integer
-                      portion:
-                        type: integer
-                      size:
-                        type: integer
                       calories:
-                        type: string
-                      fat:
                         type: string
                       protein:
                         type: string
+                      fat:
+                        type: string
                       carbs:
                         type: string
+
     delete:
       tags:
         - My meal
-      summary: Delete food from meal
-      description: Remove a food item from a meal.
+      summary: Remove food item from a meal
+      description: Remove a specific food item from a meal.
       parameters:
         - name: meal_id
           in: path
@@ -216,7 +200,7 @@ paths:
                   format: date
       responses:
         200:
-          description: Successfully removed food from meal
+          description: Successfully removed food item from meal
           content:
             application/json:
               schema:
@@ -224,27 +208,12 @@ paths:
                 properties:
                   message:
                     type: string
-                  mealNutritions:
-                    type: object
-                    properties:
-                      ListFood_ID:
-                        type: integer
-                      meal_id:
-                        type: integer
-                      ListFood_fat:
-                        type: string
-                      ListFood_carbs:
-                        type: string
-                      ListFood_calories:
-                        type: string
-                      ListFood_protein:
-                        type: string
 
   /api/meals/{meal_id}/foods:
     post:
       tags:
         - My meal
-      summary: Add new food to meal
+      summary: Add food to meal
       description: Add a new food item to a specific meal.
       parameters:
         - name: meal_id
@@ -280,28 +249,30 @@ paths:
                 properties:
                   message:
                     type: string
-                  updatedListFood:
-                    type: object
-                    properties:
-                      ListFood_ID:
-                        type: integer
-                      meal_id:
-                        type: integer
-                      ListFood_fat:
-                        type: string
-                      ListFood_carbs:
-                        type: string
-                      ListFood_calories:
-                        type: string
-                      ListFood_protein:
-                        type: string
+                  food:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        food_id:
+                          type: integer
+                        name:
+                          type: string
+                        calories:
+                          type: string
+                        protein:
+                          type: string
+                        fat:
+                          type: string
+                        carbs:
+                          type: string
 
   /api/diaries:
     post:
       tags:
         - My meal
       summary: Add new diary
-      description: Add a new diary entry for the day.
+      description: Add a new diary entry for the specified date and user.
       requestBody:
         required: true
         content:
@@ -311,9 +282,11 @@ paths:
               properties:
                 userId:
                   type: integer
+                  description: ID of the user
                 date:
                   type: string
                   format: date
+                  description: The date for the diary entry
       responses:
         200:
           description: Successfully added diary
@@ -324,37 +297,54 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Diary created successfully"
                   diary:
                     type: object
                     properties:
                       diary_id:
                         type: integer
+                        description: ID of the newly created diary
                       user_id:
                         type: integer
+                        description: ID of the user associated with the diary
                       calories_consumed:
                         type: string
                         nullable: true
+                        description: Total calories consumed (if any)
                       calories_remaining:
                         type: string
+                        description: Remaining calories allowed
                       protein_consumed:
                         type: string
                         nullable: true
+                        description: Total protein consumed (if any)
                       protein_remaining:
                         type: string
+                        description: Remaining protein allowed
                       fat_consumed:
                         type: string
                         nullable: true
+                        description: Total fat consumed (if any)
                       fat_remaining:
                         type: string
+                        description: Remaining fat allowed
                       carbs_consumed:
                         type: string
                         nullable: true
+                        description: Total carbohydrates consumed (if any)
                       carbs_remaining:
                         type: string
+                        description: Remaining carbohydrates allowed
                       date:
                         type: string
-                        format: date-time
+                        format: date
+                        description: The date of the diary entry
+        400:
+          description: Invalid input data
+        500:
+          description: Internal server error
 
+  # Authentication API
   /api/users/signup:
     post:
       tags:
@@ -513,12 +503,14 @@ paths:
                   token:
                     type: string
                     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiSGlldXYzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzI5NTc5ODYyLCJleHAiOjE3Mjk1ODM0NjJ9.9zoy94W-DxCc7c0Q_gPZ5SteUbrIz2Oh1cf1wlTKNhw"
+
+  # Setting API
   /api/users/{user_id}:
     get:
       tags:
         - User setting
       summary: Get user information
-      description:  Get the information of a specific user.
+      description: Get the information of a specific user.
       parameters:
         - name: user_id
           in: path
@@ -584,6 +576,7 @@ paths:
                         date:
                           type: string
                           example: "2026-09-22"
+
     put:
       tags:
         - User setting
@@ -617,7 +610,8 @@ paths:
                   enum: [male, female]
                 activity_level:
                   type: string
-                  enum: [not very active, moderately active, active, very active]
+                  enum:
+                    [not very active, moderately active, active, very active]
                 goal_type:
                   type: string
                   enum: [weight loss, weight gain]
@@ -669,6 +663,7 @@ paths:
                         type: string
                         example: "male"
 
+  # Dashboard API
   /api/diaries/meals:
     get:
       tags:
@@ -734,57 +729,3 @@ paths:
                         type: string
                         format: date-time
                         example: "2023-12-31T17:00:00.000Z"
-
-  /api/users/{userId}/reports:
-    get:
-      tags:
-        - Report
-      summary: Track user nutrition over specific days
-      description: Retrieve a summary and detailed report of calories consumed by a user over a specific number of days.
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          description: ID of the user
-          schema:
-            type: integer
-        - name: days
-          in: query
-          required: true
-          description: The number of days to track the nutrition report (7, 15, 30)
-          schema:
-            type: integer
-            enum: [7, 15, 30]
-      responses:
-        200:
-          description: Successfully retrieved the user's nutrition report
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  report:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        Sum_calories_consumed:
-                          type: string
-                          description: Total calories consumed over the specified period
-                          example: "1850.00"
-                  reportDetails:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        calories_consumed:
-                          type: string
-                          description: Calories consumed on a specific date
-                          example: "1400.00"
-                        date:
-                          type: string
-                          format: date
-                          description: The date of the nutrition entry
-                          example: "2024-10-22"
-
-

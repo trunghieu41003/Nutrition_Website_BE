@@ -182,7 +182,7 @@ const UpdatePortionSize = (portion, size, foodId, ListFoodId) => {
 const findFoodIdByDiaryId = (diaryId) => {
   return new Promise((resolve, reject) => {
     const query = `
-      Select lff.food_id From diary_listFood dl Join 
+      Select lff.food_id From diary_listfood dl Join 
       listfood_food lff on dl.ListFood_id = lff.ListFood_id
       Where dl.diary_id = ?
   `;
