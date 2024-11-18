@@ -89,6 +89,10 @@ const updateUserInformation = (userId, user) => {
       setClause.push('name = ?');
       params.push(user.name);
     }
+    if (user.email) {
+      setClause.push('email = ?');
+      params.push(user.email);
+    }
     // Nếu không có trường nào để cập nhật, chỉ cần resolve mà không thực hiện truy vấn
     if (setClause.length === 0) {
       return resolve({ message: 'Không có trường nào để cập nhật, không thực hiện thay đổi.' });
