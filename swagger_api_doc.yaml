@@ -541,7 +541,7 @@ paths:
   /api/auth/users/forgot-password:
     post:
       tags:
-        - User setting
+        - User authentication
       summary: Send a password reset email
       description: Sends an email to the user with a link to reset their password.
       requestBody:
@@ -590,7 +590,7 @@ paths:
   /api/auth/users/reset-password:
     put:
       tags:
-        - User setting
+        - User authentication
       summary: Reset the user's password
       description: This endpoint allows users to reset their password using a reset token and a new password.
       requestBody:
