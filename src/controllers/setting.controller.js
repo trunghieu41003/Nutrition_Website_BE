@@ -4,7 +4,7 @@ const goalmodel = require('../models/goal.model');
 const diarymodel = require('../models/diary.model');
 const listfoodmodel = require('../models/listfood.model')
 const TDEEService = require('../services/TDEEService');
-
+const bcrypt = require('bcrypt');
 const updateUserInfo = async (req, res) => {
   const { userId } = req.body;
   const userData = req.body;

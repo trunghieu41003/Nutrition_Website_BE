@@ -538,6 +538,131 @@ paths:
                     type: string
                     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiSGlldXYzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzI5NTc5ODYyLCJleHAiOjE3Mjk1ODM0NjJ9.9zoy94W-DxCc7c0Q_gPZ5SteUbrIz2Oh1cf1wlTKNhw"
 
+  /api/auth/users/forgot-password:
+    post:
+      tags:
+        - User setting
+      summary: Send a password reset email
+      description: Sends an email to the user with a link to reset their password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: The email address of the user requesting a password reset
+                  example: "user@example.com"
+      responses:
+        200:
+          description: Successfully sent the reset password email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Email reset mật khẩu đã được gửi thành công!"
+        404:
+          description: User not found with the provided email address
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Không tìm thấy người dùng với email này"
+        500:
+          description: Server error when sending the email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Đã xảy ra lỗi khi gửi email"
+
+  /api/auth/users/reset-password:
+    put:
+      tags:
+        - User setting
+      summary: Reset the user's password
+      description: This endpoint allows users to reset their password using a reset token and a new password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: The token sent to the user’s email for resetting the password
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZvcndhc2tpYUBleGFtcGxlLmNvbSIsImlhdCI6MTYxNjI1NjYxMn0._lOpF6kgm8F9MAtdY6WoqGBJ5RpY8akHfm7yAeFbzj0"
+                newPassword:
+                  type: string
+                  description: The new password to be set for the user
+                  example: "new_secure_password123"
+      responses:
+        200:
+          description: Successfully reset the password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password reset successfully"
+        400:
+          description: Invalid request (e.g., missing fields or invalid token)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid request"
+        404:
+          description: User not found with the provided email in the token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found"
+        401:
+          description: Token expired or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Your session expired. Please request a new password reset."
+        500:
+          description: Server error while resetting the password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error during password reset"
+                  error:
+                    type: string
+                    example: "Token is invalid or expired"
+
   # Setting API
   /api/auth/users:
     get:
