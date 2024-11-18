@@ -8,19 +8,28 @@ const TDEEService = require('../services/TDEEService');
 const updateUserInfo = async (req, res) => {
   const { userId } = req.body;
   const userData = req.body;
-  const goalData = req.body;
-
   try {
     console.log('Received request to update user info for user ID:', userId); // Log initial request
     const goal = await goalmodel.findGoalbyUser(userId);
     const user = await usermodel.findUserByID(userId);
     const goalId = goal.goal_id;
-
+    // Check if password is being updated
+    if (userData.newPassword) {
+      if (!userData.password) {
+        return res.status(400).json({ message: 'Mật khẩu cũ là bắt buộc để đổi mật khẩu.' });
+      }
+      const isMatch = await bcrypt.compare(userData.password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Mật khẩu cũ không đúng.' });
+      }
+      // Hash the new password before saving
+      await bcrypt.hash(userData.newPassword, 10);
+    }
     // Update user information
     await usermodel.updateUserInformation(userId, userData);
     console.log('Updated user information for user ID:', userId); // Log successful user info update
     // Update user goals
-    await goalmodel.updateUserGoal(goalId, goalData);
+    await goalmodel.updateUserGoal(goalId, userData);
     console.log('Updated user goals for goal IDs:', goalId); // Log successful goal update
     // Get user diary
     const diary = await diarymodel.getUserDiary(userId);
