@@ -110,7 +110,7 @@ const sendResetPasswordEmail = async (req, res) => {
     });
 
     // Reset password link with token as a query parameter
-    const resetLink = `http://localhost:3001/resetpw?token=${token}`;
+    const resetLink = `https://nutrition-website-flax.vercel.app/resetpw?token=${token}`;
 
     // Configure the email
     const mailOptions = {
