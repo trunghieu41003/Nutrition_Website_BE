@@ -5,6 +5,7 @@ info:
   version: 1.0.0
 servers:
   - url: http://localhost:3000
+  - url: https://nutrition-website-be-1.onrender.com
 tags:
   - name: My meal
     description: Endpoints related to meal management
@@ -18,17 +19,13 @@ paths:
   # My meal API
   /api/auth/meals:
     get:
+      security:
+        - bearerAuth: [] # Endpoint này yêu cầu Bearer Token
       tags:
         - My meal
       summary: Retrieve meal nutrition information by date
       description: Get nutritional information for a user's meals on a specific date.
       parameters:
-        - name: userId
-          in: query
-          required: true
-          description: ID of the user
-          schema:
-            type: integer
         - name: date
           in: query
           required: true
@@ -61,9 +58,21 @@ paths:
                           type: string
                         carbs:
                           type: string
+                        ListFood_ID:
+                          type: integer
+                        portion:
+                          type: integer
+                        size:
+                          type: integer
+                        name_food:
+                          type: string
+                        meal_id:
+                          type: integer
 
-  /api/meals/{meal_id}/foods/{food_id}:
+  /api/auth/meals/{meal_id}/foods/{food_id}:
     get:
+      security:
+        - bearerAuth: [] # Endpoint này yêu cầu Bearer Token
       tags:
         - My meal
       summary: Retrieve food nutrition information in a meal
@@ -77,12 +86,6 @@ paths:
         - name: food_id
           in: path
           required: true
-          schema:
-            type: integer
-        - name: userId
-          in: query
-          required: true
-          description: ID of the user
           schema:
             type: integer
         - name: date
@@ -100,21 +103,37 @@ paths:
               schema:
                 type: object
                 properties:
-                  foodNutrition:
-                    type: object
-                    properties:
-                      food_id:
-                        type: integer
-                      calories:
-                        type: string
-                      protein:
-                        type: string
-                      fat:
-                        type: string
-                      carbs:
-                        type: string
+                  food:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        food_id:
+                          type: integer
+                        name:
+                          type: string
+                        calories:
+                          type: string
+                        protein:
+                          type: string
+                        fat:
+                          type: string
+                        carbs:
+                          type: string
+                        ListFood_ID:
+                          type: integer
+                        portion:
+                          type: integer
+                        size:
+                          type: integer
+                        name_food:
+                          type: string
+                        meal_id:
+                          type: integer
 
     put:
+      security:
+        - bearerAuth: [] # Endpoint này yêu cầu Bearer Token
       tags:
         - My meal
       summary: Update portion and size of a food item
@@ -137,8 +156,6 @@ paths:
             schema:
               type: object
               properties:
-                userId:
-                  type: integer
                 date:
                   type: string
                   format: date
@@ -154,23 +171,38 @@ paths:
               schema:
                 type: object
                 properties:
-                  message:
-                    type: string
-                  foodNutrition:
-                    type: object
-                    properties:
-                      food_id:
-                        type: integer
-                      calories:
-                        type: string
-                      protein:
-                        type: string
-                      fat:
-                        type: string
-                      carbs:
-                        type: string
-
+                  food:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                        food_id:
+                          type: integer
+                        name:
+                          type: string
+                        calories:
+                          type: string
+                        protein:
+                          type: string
+                        fat:
+                          type: string
+                        carbs:
+                          type: string
+                        ListFood_ID:
+                          type: integer
+                        portion:
+                          type: integer
+                        size:
+                          type: integer
+                        name_food:
+                          type: string
+                        meal_id:
+                          type: integer
     delete:
+      security:
+        - bearerAuth: [] # Endpoint này yêu cầu Bearer Token
       tags:
         - My meal
       summary: Remove food item from a meal
@@ -193,8 +225,6 @@ paths:
             schema:
               type: object
               properties:
-                userId:
-                  type: integer
                 date:
                   type: string
                   format: date
@@ -209,8 +239,10 @@ paths:
                   message:
                     type: string
 
-  /api/meals/{meal_id}/foods:
+  /api/auth/meals/{meal_id}/foods:
     post:
+      security:
+        - bearerAuth: [] # Endpoint này yêu cầu Bearer Token
       tags:
         - My meal
       summary: Add food to meal
@@ -228,8 +260,6 @@ paths:
             schema:
               type: object
               properties:
-                userId:
-                  type: integer
                 date:
                   type: string
                   format: date
@@ -247,13 +277,13 @@ paths:
               schema:
                 type: object
                 properties:
-                  message:
-                    type: string
                   food:
                     type: array
                     items:
                       type: object
                       properties:
+                        message:
+                          type: string
                         food_id:
                           type: integer
                         name:
@@ -266,9 +296,21 @@ paths:
                           type: string
                         carbs:
                           type: string
+                        ListFood_ID:
+                          type: integer
+                        portion:
+                          type: integer
+                        size:
+                          type: integer
+                        name_food:
+                          type: string
+                        meal_id:
+                          type: integer
 
-  /api/diaries:
+  /api/auth/diaries:
     post:
+      security:
+        - bearerAuth: [] # Endpoint này yêu cầu Bearer Token
       tags:
         - My meal
       summary: Add new diary
@@ -280,9 +322,6 @@ paths:
             schema:
               type: object
               properties:
-                userId:
-                  type: integer
-                  description: ID of the user
                 date:
                   type: string
                   format: date
@@ -390,7 +429,7 @@ paths:
                 activity_level:
                   type: string
                   description: User's activity level
-                  example: "moderate"
+                  example: "active"
                 goal_type:
                   type: string
                   description: The user's fitness goal type
@@ -444,7 +483,7 @@ paths:
                         example: "3316.88"
                       activity_level:
                         type: string
-                        example: "moderate"
+                        example: "active"
                       gender:
                         type: string
                         example: "male"
@@ -484,11 +523,6 @@ paths:
                   type: string
                   description: User's password
                   example: "123456"
-                date:
-                  type: string
-                  format: date
-                  description: The login date
-                  example: "2024-01-01"
       responses:
         200:
           description: Successfully logged in
@@ -505,22 +539,24 @@ paths:
                     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiSGlldXYzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzI5NTc5ODYyLCJleHAiOjE3Mjk1ODM0NjJ9.9zoy94W-DxCc7c0Q_gPZ5SteUbrIz2Oh1cf1wlTKNhw"
 
   # Setting API
-  /api/users/{user_id}:
+  /api/auth/users:
     get:
+      security:
+        - bearerAuth: [] # Endpoint này yêu cầu Bearer Token
       tags:
         - User setting
       summary: Get user information
       description: Get the information of a specific user.
       parameters:
         - name: user_id
-          in: path
-          required: true
+          in: query
+          required: false
           description: ID of the user
           schema:
             type: integer
       responses:
         200:
-          description: get successfully
+          description: Get user information successfully
           content:
             application/json:
               schema:
@@ -534,7 +570,7 @@ paths:
                     properties:
                       user_id:
                         type: integer
-                        example: 1
+                        example: 28
                       name:
                         type: string
                         example: "Hieu"
@@ -549,46 +585,42 @@ paths:
                         example: "2003-04-12"
                       email:
                         type: string
-                        example: "Hieuv3@example.com"
+                        example: "Hieuv333@example.com"
                       password:
                         type: string
-                        example: "$2b$10$UocTJzKxXiWWtF7EytyKX.4EmkiScJvbBLQSODDFegeghlzKkCLA2"
+                        example: "$2b$10$Oya3J5m5EvBxf9ju0.FjIO2XJc7Lx9fiiZmH3RyxxPUWN9iQQQXzm"
                       calories_daily:
                         type: string
-                        example: "3316.88"
+                        example: "3747.81"
                       activity_level:
                         type: string
-                        example: "moderate"
+                        example: "active"
                       gender:
                         type: string
                         example: "male"
                   goal:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        goal_type:
-                          type: string
-                          example: "weight loss"
-                        weight_goal:
-                          type: number
-                          example: 100
-                        date:
-                          type: string
-                          example: "2026-09-22"
+                    type: object
+                    properties:
+                      goal_id:
+                        type: integer
+                        example: 28
+                      weight_goal:
+                        type: number
+                        example: 100
+                      goal_type:
+                        type: string
+                        example: "weight loss"
+                      days_to_goal:
+                        type: string
+                        example: "2026-10-18T17:00:00.000Z"
 
     put:
+      security:
+        - bearerAuth: [] # Endpoint này yêu cầu Bearer Token
       tags:
         - User setting
       summary: Update user information
       description: Update the information of a specific user.
-      parameters:
-        - name: user_id
-          in: path
-          required: true
-          description: ID of the user
-          schema:
-            type: integer
       requestBody:
         required: true
         content:
@@ -664,19 +696,15 @@ paths:
                         example: "male"
 
   # Dashboard API
-  /api/diaries/meals:
+  /api/auth/diaries/meals:
     get:
+      security:
+        - bearerAuth: [] # Endpoint này yêu cầu Bearer Token
       tags:
         - Dashboard
       summary: Get nutrition for a specific date
       description: Retrieve nutrition information (calories, protein, fat, carbs) consumed and remaining for a user on a specific date.
       parameters:
-        - name: userId
-          in: query
-          required: true
-          description: ID of the user
-          schema:
-            type: integer
         - name: date
           in: query
           required: true
@@ -729,3 +757,9 @@ paths:
                         type: string
                         format: date-time
                         example: "2023-12-31T17:00:00.000Z"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # Định dạng token (thường là JWT, có thể đổi nếu khác)
