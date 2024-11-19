@@ -93,9 +93,9 @@ const updateUserInformation = (userId, user) => {
       setClause.push('email = ?');
       params.push(user.email);
     }
-    if (user.newPassword) {
+    if (user.password) {
       setClause.push('password = ?');
-      params.push(user.newPassword);
+      params.push(user.password);
     }
     // Nếu không có trường nào để cập nhật, chỉ cần resolve mà không thực hiện truy vấn
     if (setClause.length === 0) {

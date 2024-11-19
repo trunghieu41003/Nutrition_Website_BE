@@ -18,7 +18,6 @@ const reportroutes = require('./routes/report.routes');
 const settingroutes = require('./routes/setting.routes');
 const dashboardroutes = require('./routes/dashboard.routes');
 const authenticateToken = require('./middleware/jwt');
-require('dotenv').config();
 
 app.use(cors()); // Sử dụng middleware cors để xử lý CORS
 // Middleware to parse JSON

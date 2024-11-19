@@ -22,8 +22,9 @@ const updateUserInfo = async (req, res) => {
       if (!isMatch) {
         return res.status(400).json({ message: 'Mật khẩu cũ không đúng.' });
       }
-      // Hash the new password before saving
-      await bcrypt.hash(userData.newPassword, 10);
+      // Hash mật khẩu mới trước khi lưu
+      userData.password = await bcrypt.hash(userData.newPassword, 10); // Lưu hash vào userData.password
+      delete userData.newPassword; // Xóa `newPassword` để tránh nhầm lẫn
     }
     // Update user information
     await usermodel.updateUserInformation(userId, userData);

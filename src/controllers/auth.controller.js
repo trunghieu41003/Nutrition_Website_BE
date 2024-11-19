@@ -47,7 +47,7 @@ const signUp = async (req, res) => {
 
 // Xử lý đăng nhập
 const logIn = async (req, res) => {
-  const { email, password, date } = req.body;
+  const { email, password} = req.body;
 
   try {
     // Kiểm tra xem email có tồn tại không
