@@ -538,7 +538,7 @@ paths:
                     type: string
                     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiSGlldXYzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzI5NTc5ODYyLCJleHAiOjE3Mjk1ODM0NjJ9.9zoy94W-DxCc7c0Q_gPZ5SteUbrIz2Oh1cf1wlTKNhw"
 
-  /api/auth/users/forgot-password:
+  /api/users/forgot-password:
     post:
       tags:
         - User authentication
@@ -587,7 +587,7 @@ paths:
                     type: string
                     example: "Đã xảy ra lỗi khi gửi email"
 
-  /api/auth/users/reset-password:
+  /api/users/reset-password:
     put:
       tags:
         - User authentication
