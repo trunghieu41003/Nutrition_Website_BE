@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/81fe7f55-938c-42de-b5d4-a3d57e62a9e3/resourceGroups/NodeJSWebDeoployment/providers/Microsoft.Web/sites/NutritionBE",
+    "appService.deploySubpath": "."
+}
