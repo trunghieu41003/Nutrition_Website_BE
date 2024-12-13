@@ -17,11 +17,14 @@ const mymealroutes = require('./routes/mymeal.routes');
 const reportroutes = require('./routes/report.routes');
 const settingroutes = require('./routes/setting.routes');
 const dashboardroutes = require('./routes/dashboard.routes');
-const authenticateToken = require('./middleware/jwt');
+const {authenticateToken, authenticateAdmin} = require('./middleware/jwt');
+const adminroutes = require('./routes/admin.routes');
+
 
 app.use(cors()); // Sử dụng middleware cors để xử lý CORS
 // Middleware to parse JSON
 app.use(express.json()); // Add middleware to parse JSON body
+app.use(express.urlencoded({ extended: true }));
 // Đăng ký các routes RESTful cho API
 
 app.use('/api', authroutes);
@@ -30,6 +33,7 @@ app.use('/api/auth', authenticateToken, reportroutes);
 app.use('/api/auth', authenticateToken, settingroutes);
 app.use('/api/auth', authenticateToken, dashboardroutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api/admin', authenticateAdmin, adminroutes);
 
 // Start the server
 app.listen(port, () => {
