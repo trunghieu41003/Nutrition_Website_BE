@@ -9,7 +9,7 @@ const file = fs.readFileSync(path.resolve('swagger_api_doc.yaml'), 'utf8');
 const swaggerDocument = YAML.parse(file);
 const cors = require('cors'); // Import cors
 
-const port = process.env.PORT
+const port = process.env.APP_PORT
 const hostname = 'localhost';
 
 const authroutes = require('./routes/auth.routes');

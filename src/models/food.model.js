@@ -1,13 +1,13 @@
 const connection = require('../config/database');
 
-const getAllFood = (foodId) => {
+const getAllFood = () => {
   return new Promise((resolve, reject) => {
     const query = `
-      SELECT * FROM food where food_id = ?;
+      SELECT * FROM food;
   `;
-    connection.query(query, [foodId], (err, results) => {
+    connection.query(query, (err, results) => {
       if (err) reject(err);
-      else resolve(results[0]);
+      else resolve(results);
     });
   });
 };
