@@ -26,7 +26,18 @@ const updateFood = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
+const deleteFood = async (req, res) => {
+    const {foodId} = req.body;
+    try {
+        const success = await foodmodel.deleteFood(foodId);
+        if(success) return res.status(200).json({ message: "Delete food thanh cong"});
+        return res.status(500).json({ error: error.message });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
 module.exports = {
     addFood,
-    updateFood
+    updateFood,
+    deleteFood
 };

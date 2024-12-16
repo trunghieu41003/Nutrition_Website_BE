@@ -27,6 +27,7 @@ const addFood = (foodData) => {
     );
   });
 };
+
 const updateFood = (foodData) => {
   return new Promise((resolve, reject) => {
     const {foodId, nameFood, fat, carbs, calories, protein, servingSize } = foodData;
@@ -37,7 +38,20 @@ const updateFood = (foodData) => {
         if (err) {
           return reject(err);
         }
-        resolve({ foodId: results.insertId, ...foodData });
+        resolve(true);
+      }
+    );
+  });
+};
+
+const deleteFood = (foodId) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      'DELETE FROM food WHERE food_id = ?',[foodId],(err, results) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(true);
       }
     );
   });
@@ -46,5 +60,6 @@ const updateFood = (foodData) => {
 module.exports = {
   getAllFood,
   addFood,
-  updateFood
+  updateFood,
+  deleteFood
 } 
