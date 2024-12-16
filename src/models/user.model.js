@@ -145,6 +145,44 @@ const updateUserPassword = (email, newPassword) => {
     );
   });
 };
+const findAllUser = () => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      'Select * from user',(err, results) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(results); // Return the result of the update
+      }
+    );
+  });
+};
+const deleteUser = (id) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      'Delete from user where user_id = ?',[id],(err, results) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(true); // Return the result of the update
+      }
+    );
+  });
+};
+const findUserContaining = (searchString) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      'SELECT * FROM user WHERE name LIKE ? OR email LIKE ?', 
+      [`%${searchString}%`, `%${searchString}%`], // Properly format the parameterized query
+      (err, results) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(results);
+      }
+    );
+  });
+};
 
 module.exports = {
   createUser,
@@ -154,6 +192,8 @@ module.exports = {
   updateUserPassword,
   findUserByID,
   updateUserInformation,
-
-  updateCaloriesDaily
+  updateCaloriesDaily,
+  findAllUser,
+  deleteUser,
+  findUserContaining
 };

@@ -1,5 +1,6 @@
 const foodmodel = require('../models/food.model');
 const mealmodel = require('../models/meal.model');
+const usermodel = require('../models/user.model');
 
 const addFood = async (req, res) => {
     const {nameFood, fat, carbs, calories, protein, servingSize } = req.body;
@@ -102,6 +103,34 @@ const findMealByNameContaining = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
+const findAllUser = async (req, res) => {
+    try {
+        const listResult = await usermodel.findAllUser();
+        if(listResult) return res.status(200).json(listResult);
+        return res.status(500).json({ error: error.message });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+const deleteUser = async (req, res) => {
+    try {
+        const listResult = await usermodel.deleteUser();
+        if(listResult) return res.status(200).json("Delete user thanh cong");
+        return res.status(500).json({ error: error.message });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+const findUserContaining = async (req, res) => {
+    const {string} = req.body;
+    try {
+        const listResult = await usermodel.findUserContaining(string);
+        if(listResult) return res.status(200).json(listResult);
+        return res.status(500).json({ error: error.message });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
 module.exports = {
     addFood,
     updateFood,
@@ -111,5 +140,8 @@ module.exports = {
     addMeal,
     updateMeal,
     deleteMeal,
-    findMealByNameContaining
+    findMealByNameContaining,
+    findAllUser,
+    deleteUser,
+    findUserContaining
 };

@@ -11,4 +11,7 @@ router.post('/meal/add', admin.addMeal);
 router.post('/meal/update', admin.updateMeal);
 router.post('/meal/delete', admin.deleteMeal);
 router.post('/meal/search', admin.findMealByNameContaining);
+router.post('/user', admin.findAllUser);
+router.post('/user/delete', admin.deleteUser);
+router.post('/user/search', admin.findUserContaining);
 module.exports = router;
