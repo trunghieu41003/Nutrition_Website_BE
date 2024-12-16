@@ -8,10 +8,25 @@ const addFood = async (req, res) => {
           });
         const success = await foodmodel.addFood(newFood);
         if(success) return res.status(200).json({ message: "Insert food thanh cong"});
+        return res.status(500).json({ error: error.message });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+const updateFood = async (req, res) => {
+    const {foodId, nameFood, fat, carbs, calories, protein, servingSize } = req.body;
+    try {
+        const newFood = ({
+            foodId, nameFood, fat, carbs, calories, protein, servingSize
+          });
+        const success = await foodmodel.updateFood(newFood);
+        if(success) return res.status(200).json({ message: "Update food thanh cong"});
+        return res.status(500).json({ error: error.message });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
 };
 module.exports = {
-    addFood
+    addFood,
+    updateFood
 };

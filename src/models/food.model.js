@@ -15,7 +15,6 @@ const getAllFood = () => {
 const addFood = (foodData) => {
   return new Promise((resolve, reject) => {
     const {nameFood, fat, carbs, calories, protein, servingSize } = foodData;
-    console.log(foodData)
     connection.query(
       'INSERT INTO food (name_food, fat, carbs, calories, protein, serving_size) VALUES (?, ?, ?, ?, ?, ?)',
       [nameFood, fat, carbs, calories, protein, servingSize],
@@ -23,7 +22,22 @@ const addFood = (foodData) => {
         if (err) {
           return reject(err);
         }
-        resolve(true); // Trả về dữ liệu người dùng mới
+        resolve(true);
+      }
+    );
+  });
+};
+const updateFood = (foodData) => {
+  return new Promise((resolve, reject) => {
+    const {foodId, nameFood, fat, carbs, calories, protein, servingSize } = foodData;
+    connection.query(
+      'UPDATE food SET name_food = ?, fat = ?, carbs = ?, calories = ?, protein = ?, serving_size = ? WHERE food_id = ?',
+      [nameFood, fat, carbs, calories, protein, servingSize, foodId ],
+      (err, results) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve({ foodId: results.insertId, ...foodData });
       }
     );
   });
@@ -31,5 +45,6 @@ const addFood = (foodData) => {
 
 module.exports = {
   getAllFood,
-  addFood
+  addFood,
+  updateFood
 } 
