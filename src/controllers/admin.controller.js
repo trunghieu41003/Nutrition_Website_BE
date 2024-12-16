@@ -36,8 +36,19 @@ const deleteFood = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
+const findFoodByNameContaining = async (req, res) => {
+    const {string} = req.body;
+    try {
+        const listResult = await foodmodel.findFoodByNameContaining(string);
+        if(listResult) return res.status(200).json(listResult);
+        return res.status(500).json({ error: error.message });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
 module.exports = {
     addFood,
     updateFood,
-    deleteFood
+    deleteFood,
+    findFoodByNameContaining
 };

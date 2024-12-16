@@ -57,9 +57,25 @@ const deleteFood = (foodId) => {
   });
 };
 
+const findFoodByNameContaining = (searchString) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      'SELECT * FROM food WHERE name_food LIKE ?', 
+      [`%${searchString}%`], // Properly format the parameterized query
+      (err, results) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(results);
+      }
+    );
+  });
+};
+
 module.exports = {
   getAllFood,
   addFood,
   updateFood,
-  deleteFood
+  deleteFood,
+  findFoodByNameContaining
 } 
