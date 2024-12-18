@@ -21,7 +21,7 @@ const {authenticateToken, authenticateAdmin} = require('./middleware/jwt');
 const adminroutes = require('./routes/admin.routes');
 
 
-app.use(cors()); // Sử dụng middleware cors để xử lý CORS
+app.use(cors({ origin: 'http://localhost:3000' })); // Sử dụng middleware cors để xử lý CORS
 // Middleware to parse JSON
 app.use(express.json()); // Add middleware to parse JSON body
 app.use(express.urlencoded({ extended: true }));

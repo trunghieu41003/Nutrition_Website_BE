@@ -147,20 +147,27 @@ const updateUserPassword = (email, newPassword) => {
 };
 const findAllUser = () => {
   return new Promise((resolve, reject) => {
-    connection.query(
-      'Select * from user',(err, results) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve(results); // Return the result of the update
+    const sql = `
+      SELECT u.*, g.weight_goal
+      FROM user u
+      JOIN user_goal ug ON u.user_id = ug.user_id
+      JOIN goal g ON g.goal_id = ug.goal_id
+    `;
+
+    connection.query(sql, (err, results) => {
+      if (err) {
+        console.error("Error executing findAllUsers query:", err);
+        return reject(err);
       }
-    );
+      resolve(results);
+    });
   });
 };
+
 const deleteUser = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      'Delete from user where user_id = ?',[id],(err, results) => {
+      'Delete from user where user_id = ?', [id], (err, results) => {
         if (err) {
           return reject(err);
         }
@@ -172,7 +179,7 @@ const deleteUser = (id) => {
 const findUserContaining = (searchString) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      'SELECT * FROM user WHERE name LIKE ? OR email LIKE ?', 
+      'SELECT * FROM user WHERE name LIKE ? OR email LIKE ?',
       [`%${searchString}%`, `%${searchString}%`], // Properly format the parameterized query
       (err, results) => {
         if (err) {
