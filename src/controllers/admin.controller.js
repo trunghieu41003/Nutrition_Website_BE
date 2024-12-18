@@ -113,8 +113,9 @@ const findAllUser = async (req, res) => {
     }
 };
 const deleteUser = async (req, res) => {
+    const {id} = req.body;
     try {
-        const listResult = await usermodel.deleteUser();
+        const listResult = await usermodel.deleteUser(id);
         if(listResult) return res.status(200).json("Delete user thanh cong");
         return res.status(500).json({ error: error.message });
     } catch (error) {
