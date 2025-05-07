@@ -164,9 +164,8 @@ const addNewDiary = async (req, res) => {
 
 
 const getAllFood = async (req, res) => {
-  const { foodId } = req.params;
   try {
-    const food = await foodmodel.getAllFood(foodId);
+    const food = await foodmodel.getAllFood();
     return res.status(200).json({ food });
   } catch (error) {
     return res.status(500).json({ error: error.message });

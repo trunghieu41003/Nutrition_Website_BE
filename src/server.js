@@ -10,7 +10,7 @@ const swaggerDocument = YAML.parse(file);
 const cors = require('cors'); // Import cors
 
 const port = process.env.PORT
-const hostname = 'localhost';
+const hostname = '0.0.0.0';
 
 const authroutes = require('./routes/auth.routes');
 const mymealroutes = require('./routes/mymeal.routes');
@@ -31,7 +31,6 @@ app.use('/api/auth', authenticateToken, settingroutes);
 app.use('/api/auth', authenticateToken, dashboardroutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Start the server
-app.listen(port, () => {
+app.listen(port, hostname, () => {
     console.log(`Example app listening at http://${hostname}:${port}`);
 });
