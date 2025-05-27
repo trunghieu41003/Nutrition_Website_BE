@@ -14,14 +14,13 @@ const calculateTDEE = (user) => {
         BMR = 10 * weight + 6.25 * height - 5 * age - 161;
     }
 
-    // Hệ số hoạt động
     let activityFactor;
-    switch (activity_level) {
+    switch ((activity_level || '').toLowerCase()) {
         case 'not very active': activityFactor = 1.375; break;
         case 'moderately active': activityFactor = 1.55; break;
         case 'active': activityFactor = 1.725; break;
         case 'very active': activityFactor = 1.9; break;
-        //default: activityFactor = 1.2;
+        default: activityFactor = 1.2; // fallback để tránh lỗi
     }
 
     // TDEE = BMR * activityFactor

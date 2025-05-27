@@ -33,6 +33,9 @@ const updateUserInfo = async (req, res) => {
     await goalmodel.updateUserGoal(goalId, userData);
     console.log('Updated user goals for goal IDs:', goalId); // Log successful goal update
     // Get user diary
+    const updatedUser = await usermodel.findUserByID(userId);
+    const updatedGoal = await goalmodel.findGoalbyUser(userId);
+
     const diary = await diarymodel.getUserDiary(userId);
     console.log('Retrieved diary entries for user ID:', userId, diary); // Log retrieved diary entries
 
@@ -42,7 +45,7 @@ const updateUserInfo = async (req, res) => {
         console.log('Processing diary entry ID:', diaryEntry.diary_id); // Log current diary entry being processed
 
         // Update TDEE and diary
-        await TDEEService.updateUserTDEEAndDiary(userId, diaryEntry.diary_id, user, goal, goalId);
+        await TDEEService.updateUserTDEEAndDiary(userId, diaryEntry.diary_id, updatedUser, updatedGoal, goalId);
         console.log('Updated TDEE and diary for diary entry ID:', diaryEntry.diary_id); // Log TDEE update
 
         // Update nutrition consumed
@@ -55,13 +58,13 @@ const updateUserInfo = async (req, res) => {
 
         if (food.length > 0) {
           food.forEach(async (foodEntry) => {
-            console.log('Decreasing nutrition for food ID:', foodEntry.foodId, 'in diary ID:', diaryEntry.diary_id); // Log decrease operation
+            console.log('Decreasing nutrition for food ID:', foodEntry.food_id, 'in diary ID:', diaryEntry.diary_id); // Log decrease operation
             await diarymodel.updateNutritionRemain(diaryEntry.diary_id);
           });
         }
       };
     }
-    return res.status(200).json({ message: 'Update successfully', user });
+    return res.status(200).json({ message: 'Update successfully' });
   } catch (error) {
     console.error('Error updating user info for user ID:', userId, error); // Log error details
     return res.status(500).json({ error: error.message });

@@ -209,16 +209,28 @@ const updateNutritionRemain = (diaryId) => {
     UPDATE diary 
 SET 
   calories_remaining = COALESCE(calories_remaining, 0) - COALESCE(
-    (SELECT Sum(ListFood_calories) FROM listfood WHERE diary_id = ?), 0
+    (SELECT 
+          COALESCE(SUM(ListFood_calories), 0)
+        FROM diary_listfood dl Join listfood lf on dl.ListFood_ID = lf.ListFood_ID
+        WHERE diary_id = ?), 0
   ),
   carbs_remaining = COALESCE(carbs_remaining, 0) - COALESCE(
-    (SELECT Sum(ListFood_carbs) FROM listfood WHERE diary_id = ?), 0
+    (SELECT 
+          COALESCE(SUM(ListFood_carbs), 0)
+        FROM diary_listfood dl Join listfood lf on dl.ListFood_ID = lf.ListFood_ID
+        WHERE diary_id = ?), 0
   ), 
   protein_remaining = COALESCE(protein_remaining, 0) - COALESCE(
-    (SELECT Sum(ListFood_protein) FROM listfood WHERE diary_id = ?), 0
+    (SELECT 
+          COALESCE(SUM(ListFood_protein), 0)
+        FROM diary_listfood dl Join listfood lf on dl.ListFood_ID = lf.ListFood_ID
+        WHERE diary_id = ?), 0
   ), 
   fat_remaining = COALESCE(fat_remaining, 0) + COALESCE(
-    (SELECT Sum(ListFood_fat) FROM listfood WHERE diary_id = ?), 0
+    (SELECT 
+          COALESCE(SUM(ListFood_fat), 0)
+        FROM diary_listfood dl Join listfood lf on dl.ListFood_ID = lf.ListFood_ID
+        WHERE diary_id = ?), 0
   )
 WHERE diary_id = ?;
 
